@@ -18,13 +18,13 @@ private:
 
 public:
     RfidDLL(QObject *parent = nullptr);
+    void readData();
 
 signals:
     void dataReceived(QString data);
 
-public slots:
-    void readData();
-
+private slots:
+    void onDataRead();
 };
 
 #endif // RFIDDLL_H

@@ -16,19 +16,21 @@ void RfidDLL::initSerialPort()
     m_serial->setParity(QSerialPort::NoParity);
     m_serial->setStopBits(QSerialPort::OneStop);
     m_serial->setFlowControl(QSerialPort::HardwareControl);
-
-    if (m_serial->open(QIODevice::ReadWrite))
-    {
-        connect(m_serial, &QSerialPort::readyRead, this, &RfidDLL::readData);
-    }
-    else
-    {
-        qDebug() << "Virhe!!" << endl;
-    }
-
 }
 
 void RfidDLL::readData()
+{
+    if (m_serial->open(QIODevice::ReadWrite))
+    {
+        connect(m_serial, &QSerialPort::readyRead, this, &RfidDLL::onDataRead);
+    }
+    else
+    {
+        qDebug() << "Could not open a connection to serial port..." << endl;
+    }
+}
+
+void RfidDLL::onDataRead()
 {
     QString cardSerialNumber;
     char data[20];
@@ -36,21 +38,19 @@ void RfidDLL::readData()
     bytesread = m_serial->read(data, 20);
     data[bytesread] = '\0';
     if (bytesread > 10)
-    {
 
+    {
         for (int i = 0; i <= 9; i++)
         {
             cardSerialNumber = data;
         }
         cardSerialNumber.remove(0, 3);
 
-        qDebug() << "Kortin numero: " << cardSerialNumber;
-        //ui->lblNaytaArvo->setText(QString("Kortin numero: ").append(cardSerialNumber));
+        qDebug() << "Card number: " << cardSerialNumber;
     }
     else
     {
-        qDebug() << "Virhe korttia luettaessa";
-        //ui->lblNaytaArvo->setText("Virhe korttia luettaessa");
+        qDebug() << "Could not read data from serial port...";
     }
 
     emit dataReceived(cardSerialNumber);

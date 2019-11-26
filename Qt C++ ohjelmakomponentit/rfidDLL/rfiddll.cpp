@@ -5,12 +5,12 @@ RfidDLL::RfidDLL(QObject *parent)
     : QObject(parent),
       m_serial(new QSerialPort())
 {
+    initSerialPort();
 }
 
-void RfidDLL::on_btnHaeArvo_clicked()
+void RfidDLL::initSerialPort()
 {
-    // Vaihda oikea portti
-    m_serial->setPortName("com3");
+    m_serial->setPortName(PORT);
     m_serial->setBaudRate(QSerialPort::Baud9600);
     m_serial->setDataBits(QSerialPort::Data8);
     m_serial->setParity(QSerialPort::NoParity);
@@ -19,18 +19,16 @@ void RfidDLL::on_btnHaeArvo_clicked()
 
     if (m_serial->open(QIODevice::ReadWrite))
     {
-        qDebug() << m_serial->portName();
+        connect(m_serial, &QSerialPort::readyRead, this, &RfidDLL::readData);
     }
     else
     {
-        qDebug() << "Portin avaaminen epäonnistui...";
+        qDebug() << "Virhe!!" << endl;
     }
-
-    connect(m_serial, &QSerialPort::readyRead, this, &RfidDLL::lueArvo);
 
 }
 
-void RfidDLL::lueArvo()
+void RfidDLL::readData()
 {
     QString cardSerialNumber;
     char data[20];
@@ -54,4 +52,6 @@ void RfidDLL::lueArvo()
         qDebug() << "Virhe korttia luettaessa";
         //ui->lblNaytaArvo->setText("Virhe korttia luettaessa");
     }
+
+    emit dataReceived(cardSerialNumber);
 }

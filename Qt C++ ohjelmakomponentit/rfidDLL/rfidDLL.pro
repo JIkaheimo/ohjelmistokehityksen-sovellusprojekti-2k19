@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui serialport
 
 TARGET = rfidDLL
 TEMPLATE = lib
@@ -29,8 +29,6 @@ HEADERS += \
         rfiddll.h \
         rfiddll_global.h  
 
-#muokkaa tähän oma dir
-DESTDIR = C:\Koulu\CppJatko\projekti\versio1.0
 
 unix {
     target.path = /usr/lib

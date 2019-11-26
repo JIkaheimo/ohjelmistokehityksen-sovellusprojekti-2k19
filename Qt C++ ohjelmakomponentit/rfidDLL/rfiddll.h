@@ -5,15 +5,14 @@
 #include <QDebug>
 #include <QtSerialPort/QSerialPort>
 
-class RFIDDLLSHARED_EXPORT RfidDLL : QObject
+class RFIDDLLSHARED_EXPORT RfidDLL : public QObject
 {
-
     Q_OBJECT
 private:
-    QSerialPort *m_serial;
+    QSerialPort *m_serial = nullptr;
 
 public:
-    RfidDLL(QObject *parent);
+    RfidDLL(QObject *parent = nullptr);
 
 
 private slots:

@@ -1,15 +1,14 @@
 #include "rfiddll.h"
 
 
-RfidDLL::RfidDLL(QObject *parent) : QObject(parent)
+RfidDLL::RfidDLL(QObject *parent)
+    : QObject(parent),
+      m_serial(new QSerialPort())
 {
 }
 
 void RfidDLL::on_btnHaeArvo_clicked()
 {
-
-    m_serial = new QSerialPort(this);
-
     // Vaihda oikea portti
     m_serial->setPortName("com3");
     m_serial->setBaudRate(QSerialPort::Baud9600);
@@ -27,7 +26,7 @@ void RfidDLL::on_btnHaeArvo_clicked()
         qDebug() << "Portin avaaminen epäonnistui...";
     }
 
-    connect(m_serial, SIGNAL(readyRead()), this, SLOT(lueArvo()));
+    connect(m_serial, &QSerialPort::readyRead, this, &RfidDLL::lueArvo);
 
 }
 

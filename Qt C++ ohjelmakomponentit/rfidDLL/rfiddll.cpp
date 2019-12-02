@@ -46,6 +46,7 @@ void RfidDLL::onDataRead()
         }
         cardSerialNumber.remove(0, 3);
 
+        emit dataReceived(cardSerialNumber);
         qDebug() << "Card number: " << cardSerialNumber;
     }
     else
@@ -53,5 +54,4 @@ void RfidDLL::onDataRead()
         qDebug() << "Could not read data from serial port...";
     }
 
-    emit dataReceived(cardSerialNumber);
 }

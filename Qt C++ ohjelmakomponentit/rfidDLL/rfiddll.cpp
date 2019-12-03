@@ -26,7 +26,7 @@ void RfidDLL::readData()
     }
     else
     {
-        qDebug() << "Could not open a connection to serial port..." << endl;
+        qDebug() << "Could not open a connection to serial port...";
     }
 }
 
@@ -46,12 +46,11 @@ void RfidDLL::onDataRead()
         }
         cardSerialNumber.remove(0, 3);
 
+        emit dataReceived(cardSerialNumber);
         qDebug() << "Card number: " << cardSerialNumber;
     }
     else
     {
         qDebug() << "Could not read data from serial port...";
     }
-
-    emit dataReceived(cardSerialNumber);
 }

@@ -23,10 +23,12 @@ void KoontiView::setEvents(QSqlTableModel *eventModel)
 
 void KoontiView::onDepositClicked()
 {
-    emit deposit(50);
+    float depositAmount = ui->editDeposit->text().toFloat();
+    emit deposit(depositAmount);
 }
 
 void KoontiView::onWithdrawClicked()
 {
-    emit withdraw(50);
+    float withdrawAmount = ui->editWithdraw->text().toFloat();
+    emit withdraw(withdrawAmount);
 }

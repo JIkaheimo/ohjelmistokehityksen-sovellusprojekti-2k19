@@ -46,8 +46,8 @@ void RfidDLL::onDataRead()
         }
         cardSerialNumber.remove(0, 3);
 
-        qDebug() << "Card number: " << cardSerialNumber;
         emit dataReceived(cardSerialNumber);
+        qDebug() << "Card number: " << cardSerialNumber;
     }
     else
     {

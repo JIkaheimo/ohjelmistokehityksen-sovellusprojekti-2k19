@@ -2,14 +2,16 @@
 
 
 RfidDLL::RfidDLL(QObject *parent)
-    : QObject(parent),
-      m_serial(new QSerialPort())
+    : QObject(parent)
 {
     initSerialPort();
+	readData();
+	onDataRead();
 }
 
 void RfidDLL::initSerialPort()
 {
+    m_serial = new QSerialPort;
     m_serial->setPortName(PORT);
     m_serial->setBaudRate(QSerialPort::Baud9600);
     m_serial->setDataBits(QSerialPort::Data8);

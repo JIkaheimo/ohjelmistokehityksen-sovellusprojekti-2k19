@@ -1,41 +1,37 @@
 #include "rfiddll.h"
 
 
-RfidDLL::RfidDLL(QObject *parent)
+RfidDLL::RfidDLL(QString port, QObject *parent)
     : QObject(parent),
-      m_serial(new QSerialPort())
+      m_serialPort(new QSerialPort)
 {
-    initSerialPort();
+    m_serialPort->setPortName(port);
+    m_serialPort->setBaudRate(QSerialPort::Baud9600);
+    m_serialPort->setDataBits(QSerialPort::Data8);
+    m_serialPort->setParity(QSerialPort::NoParity);
+    m_serialPort->setStopBits(QSerialPort::OneStop);
+    m_serialPort->setFlowControl(QSerialPort::HardwareControl);
+
+    connect(m_serialPort, &QSerialPort::readyRead, this, &RfidDLL::onReadyRead);
 }
 
-void RfidDLL::initSerialPort()
-{
-    m_serial->setPortName(PORT);
-    m_serial->setBaudRate(QSerialPort::Baud9600);
-    m_serial->setDataBits(QSerialPort::Data8);
-    m_serial->setParity(QSerialPort::NoParity);
-    m_serial->setStopBits(QSerialPort::OneStop);
-    m_serial->setFlowControl(QSerialPort::HardwareControl);
-}
 
 void RfidDLL::readData()
 {
-    if (m_serial->open(QIODevice::ReadWrite))
+    if (!m_serialPort->open(QIODevice::ReadWrite))
     {
-        connect(m_serial, &QSerialPort::readyRead, this, &RfidDLL::onDataRead);
-    }
-    else
-    {
+
         qDebug() << "Could not open a connection to serial port...";
     }
 }
 
-void RfidDLL::onDataRead()
+
+void RfidDLL::onReadyRead()
 {
     QString cardSerialNumber;
     char data[20];
     qint64 bytesread;
-    bytesread = m_serial->read(data, 20);
+    bytesread = m_serialPort->read(data, 20);
     data[bytesread] = '\0';
     if (bytesread > 10)
 
@@ -46,7 +42,7 @@ void RfidDLL::onDataRead()
         }
         cardSerialNumber.remove(0, 3);
 
-        emit dataReceived(cardSerialNumber);
+        emit cardRead(cardSerialNumber);
         qDebug() << "Card number: " << cardSerialNumber;
     }
     else

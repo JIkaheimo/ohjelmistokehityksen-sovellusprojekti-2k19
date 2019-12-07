@@ -14,13 +14,11 @@ QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
+
     Q_OBJECT
 private:
     DatabaseDLL* db;
     RfidDLL* rfid;
-
-    AloitusView* aloitusNakyma;
-    KoontiView* koontiNakyma;
 
     QString korttinumero = "";
 public:
@@ -33,6 +31,7 @@ private slots:
     void suoritaTalletus(float);
 
     void cardRead(QString cardNumber);
+    void readCard();
 private:
     Ui::MainWindow *ui;
 };

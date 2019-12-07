@@ -5,12 +5,11 @@
 #include <QDebug>
 #include <QMessageBox>
 
+const QString PORT = "com3";
+
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
     db(new DatabaseDLL(this)),
-    rfid(new RfidDLL(this)),
-
-    aloitusNakyma(new AloitusView(this)),
-    koontiNakyma(new KoontiView(this)),
+    rfid(new RfidDLL(PORT, this)),
 
     ui(new Ui::MainWindow)
 {
@@ -22,15 +21,20 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
         QMessageBox::critical(this, "Connection Error", "Could not connect to the database...");
     }
 
+    connect(ui->btnReadRfid, &QPushButton::clicked, this, &MainWindow::readCard);
+    connect(rfid, &RfidDLL::cardRead, this, &MainWindow::cardRead);
+
+    rfid->readData();
+    /*
     connect(koontiNakyma, &KoontiView::deposit, db, &DatabaseDLL::deposit);
     connect(koontiNakyma, &KoontiView::withdraw, db, &DatabaseDLL::withdraw);
     connect(rfid, &RfidDLL::dataReceived, this, &MainWindow::cardRead);
     connect(aloitusNakyma, &AloitusView::korttiLuettu, this, &MainWindow::cardRead);
-
     ui->nakymat->addWidget(aloitusNakyma);
     ui->nakymat->addWidget(koontiNakyma);
     ui->nakymat->setCurrentWidget(aloitusNakyma);
     rfid->readData();
+    */
 }
 
 MainWindow::~MainWindow()
@@ -40,6 +44,11 @@ MainWindow::~MainWindow()
     //delete rfid;
 }
 
+void MainWindow::readCard()
+{
+    qDebug() << "Luetaan kortti..." << endl;
+}
+
 void MainWindow::cardRead(QString cardNumber)
 {
     qDebug() << cardNumber;
@@ -47,7 +56,7 @@ void MainWindow::cardRead(QString cardNumber)
 
     this->korttinumero = cardNumber;
 
-    ui->nakymat->setEnabled(false);
+    ui->stackMain->setEnabled(false);
     pin->show();
 
     connect(pin, &PinDialog::pinEntered, this, &MainWindow::pinLuettu);
@@ -56,16 +65,18 @@ void MainWindow::cardRead(QString cardNumber)
 
 void MainWindow::pinLuettu(QString pinKoodi)
 {
+            /*
     if (db->login(korttinumero, pinKoodi.toInt()))
     {
-        ui->nakymat->setCurrentWidget(koontiNakyma);
+        ui->stackMain->setCurrentWidget(koontiNakyma);
         koontiNakyma->setEvents(db->getEvents());
     }
     else
     {
-        ui->nakymat->setCurrentWidget(aloitusNakyma);
+        ui->stackMain->setCurrentWidget(aloitusNakyma);
     }
-    ui->nakymat->setEnabled(true);
+    ui->stackMain->setEnabled(true);
+            */
 }
 
 void MainWindow::suoritaTalletus(float depositAmount)

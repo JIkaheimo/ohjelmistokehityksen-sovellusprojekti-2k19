@@ -3,28 +3,25 @@
 
 #include "rfiddll_global.h"
 #include <QDebug>
+#include <QTimer>
 #include <QtSerialPort/QSerialPort>
 
 class RFIDDLLSHARED_EXPORT RfidDLL : public QObject
 {
     Q_OBJECT
 
-    // Change this to correct port.
-    const QString PORT = "com3";
-
-private:
-    QSerialPort *m_serial = nullptr;
-    void initSerialPort();
-
 public:
-    RfidDLL(QObject *parent = nullptr);
+    explicit RfidDLL(const QString portNumber, QObject *parent = nullptr);
     void readData();
 
 signals:
-    void dataReceived(QString data);
+    void cardRead(QString data);
 
 private slots:
-    void onDataRead();
+    void onReadyRead();
+
+private:
+    QSerialPort *m_serialPort = nullptr;
 };
 
 #endif // RFIDDLL_H

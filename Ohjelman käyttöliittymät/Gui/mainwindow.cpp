@@ -24,7 +24,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
     connect(ui->btnReadRfid, &QPushButton::clicked, this, &MainWindow::readCard);
     connect(rfid, &RfidDLL::cardRead, this, &MainWindow::cardRead);
 
-    rfid->readData();
     /*
     connect(koontiNakyma, &KoontiView::deposit, db, &DatabaseDLL::deposit);
     connect(koontiNakyma, &KoontiView::withdraw, db, &DatabaseDLL::withdraw);
@@ -46,7 +45,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::readCard()
 {
-    qDebug() << "Luetaan kortti..." << endl;
+   rfid->readData();
 }
 
 void MainWindow::cardRead(QString cardNumber)

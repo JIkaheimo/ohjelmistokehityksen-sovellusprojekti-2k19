@@ -11,7 +11,7 @@ class RFIDDLLSHARED_EXPORT RfidDLL : public QObject
     Q_OBJECT
 
 public:
-    explicit RfidDLL(const QString portNumber, QObject *parent = nullptr);
+    explicit RfidDLL(const QString& portNumber, QObject *parent = nullptr);
     void readData();
 
 signals:
@@ -22,6 +22,7 @@ private slots:
 
 private:
     QSerialPort *m_serialPort = nullptr;
+    void initSerialPort(const QString &port);
 };
 
 #endif // RFIDDLL_H

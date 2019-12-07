@@ -7,8 +7,15 @@ KoontiView::KoontiView(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->btnDeposit, &QPushButton::clicked, this, &KoontiView::onDepositClicked);
-    connect(ui->btnWithdraw, &QPushButton::clicked, this, &KoontiView::onWithdrawClicked);
+    connect(
+        ui->btnDeposit, &QPushButton::clicked,
+        this, &KoontiView::onDepositClicked
+    );
+
+    connect(
+        ui->btnWithdraw, &QPushButton::clicked,
+        this, &KoontiView::onWithdrawClicked
+    );
 }
 
 KoontiView::~KoontiView()

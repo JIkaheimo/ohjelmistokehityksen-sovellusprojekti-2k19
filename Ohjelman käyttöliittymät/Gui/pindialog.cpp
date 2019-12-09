@@ -43,7 +43,7 @@ void PinDialog::onNumberButtonClicked()
 
     if (pinTeksti.length() == PIN_SIZE)
     {
-        emit pinEntered(pinKoodi);
+        emit pinEntered(pinKoodi.toInt());
         delete(this);
     }
 

@@ -18,7 +18,7 @@ public:
     ~PinDialog();
 
 signals:
-    void pinEntered(QString pin);
+    void pinEntered(int pinCode);
 
 private slots:
     void onNumberButtonClicked();

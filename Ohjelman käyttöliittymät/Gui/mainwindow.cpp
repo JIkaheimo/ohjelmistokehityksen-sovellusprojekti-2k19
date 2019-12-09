@@ -20,7 +20,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
 {
     ui->setupUi(this);
 
-    // Try to initialize connection to the "bank server".
     if (!mDB->initConnection())
     {
         QMessageBox::critical(this, "Connection Error",
@@ -28,13 +27,20 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
         );
     }
 
-    initWithdrawalView();
-    initDepositView();
+    connect(
+        mRFID, &RfidDLL::cardRead,
+        this, &MainWindow::cardRead
+    );
 
     connect(
         mDB, &DatabaseDLL::BalanceChanged,
         this, &MainWindow::showBalance
     );
+
+    initWithdrawalView();
+    initDepositView();
+
+
 
     connect(
         ui->btnReadRfid, &QPushButton::clicked,
@@ -61,10 +67,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
         [this](){ setCurrentPage(*ui->pageDeposit); }
     );
 
-    connect(
-        mRFID, &RfidDLL::cardRead,
-        this, &MainWindow::cardRead
-    );
 
     connect(
         ui->btnBack, &QPushButton::clicked,
@@ -98,7 +100,8 @@ void MainWindow::withdraw(float amount)
     {
         QMessageBox::information(this,
             "Account balance insufficient",
-            "Could not complete the transaction, because account balance is insufficient.");
+            "Could not complete the transaction, because account balance is insufficient."
+        );
     }
 }
 
@@ -106,14 +109,19 @@ void MainWindow::deposit(float depositAmount)
 {
     if (!mDB->deposit(depositAmount))
     {
-        QMessageBox::information(this, "Failed to deposit", "Failed to deposit funds...");
+        QMessageBox::information(this, "Failed to deposit",
+            "Failed to deposit funds..."
+        );
     }
 }
 
 
 void MainWindow::initWithdrawalView()
+/**
+  * Initializes WithdrawalView with any required connections.
+  */
 {
-    // Initialize withdrawal view.
+    // Create view.
     WithdrawalView* withdrawalView = new WithdrawalView(this);
     ui->layoutWithdrawal->addWidget(withdrawalView);
 
@@ -131,6 +139,9 @@ void MainWindow::initWithdrawalView()
 }
 
 void MainWindow::initDepositView()
+/**
+  * Initializes DeposView with any required connections.
+  */
 {
     // Initialize deposit view.
     DepositView* depositView = new DepositView(this);
@@ -174,19 +185,19 @@ void MainWindow::cardRead(QString cardNumber)
 {
     PinDialog *pin = new PinDialog(this);
 
-    korttinumero = cardNumber;
+    mCardNumber = cardNumber;
+    connect(pin, &PinDialog::pinEntered, this, &MainWindow::pinEntered);
 
-    ui->stackMain->setEnabled(false);
-    pin->show();
+    pin->exec();
 
-    connect(pin, &PinDialog::pinEntered, this, &MainWindow::pinLuettu);
+
 }
 
 
-void MainWindow::pinLuettu(QString pinKoodi)
+void MainWindow::pinEntered(int pinCode)
 {
-
-    if (mDB->login(korttinumero, pinKoodi.toInt()))
+    qDebug() << pinCode;
+    if (mDB->login(mCardNumber, pinCode))
     {
         setCurrentPage(*ui->pageMain);
         showBalance(mDB->getBalance());
@@ -196,7 +207,6 @@ void MainWindow::pinLuettu(QString pinKoodi)
     {
         previousPage();
     }
-    ui->stackMain->setEnabled(true);
 
 }
 

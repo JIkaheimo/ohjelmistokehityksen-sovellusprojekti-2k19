@@ -28,10 +28,10 @@ void WithdrawalView::connectWithdraw(QPushButton* button, float amount)
 
 void WithdrawalView::setWithdrawable(float amount)
 {
-    if (amount < 0) ui->btnWithdrawX->setEnabled(false);
-    if (amount < 20) ui->btnWithdraw20->setEnabled(false);
-    if (amount < 50) ui->btnWithdraw50->setEnabled(false);
-    if (amount < 100) ui->btnWithdraw100->setEnabled(false);
-    if (amount < 200) ui->btnWithdraw200->setEnabled(false);
-    if (amount < 500) ui->btnWithdraw500->setEnabled(false);
+    ui->btnWithdrawX->setEnabled(amount > 0);
+    ui->btnWithdraw20->setEnabled(amount >= 20);
+    ui->btnWithdraw50->setEnabled(amount >= 50);
+    ui->btnWithdraw100->setEnabled(amount >= 100);
+    ui->btnWithdraw200->setEnabled(amount >= 200);
+    ui->btnWithdraw500->setEnabled(amount >= 500);
 }

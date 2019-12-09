@@ -19,14 +19,14 @@ private:
     RfidDLL* mRFID;
 
     QStack<QWidget*> mPageHistory;
-    QString korttinumero = "";
+    QString mCardNumber = "";
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
 
-    void pinLuettu(QString pinKoodi);
+    void pinEntered(int pinCode);
     void withdraw(float amount);
     void deposit(float amount);
 

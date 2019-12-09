@@ -11,12 +11,17 @@ RfidDLL::RfidDLL(const QString& port, QObject *parent)
     onReadyRead();
 }
 
+RfidDLL::~RfidDLL()
+{
+    m_serialPort->close();
+}
+
 void RfidDLL::initSerialPort(const QString& port)
 /**
  * Initializes serial port for reading data.
  */
 {
-    m_serialPort = new QSerialPort;
+    m_serialPort = new QSerialPort(this);
     m_serialPort->setPortName(port);
     m_serialPort->setBaudRate(QSerialPort::Baud9600);
     m_serialPort->setDataBits(QSerialPort::Data8);
@@ -60,6 +65,6 @@ void RfidDLL::onReadyRead()
         }
         cardSerialNumber.remove(0, 3);
 
-        emit cardRead(cardSerialNumber.simplified());
+        emit cardRead(cardSerialNumber.left(10));
     }
 }

@@ -60,6 +60,6 @@ void RfidDLL::onReadyRead()
         }
         cardSerialNumber.remove(0, 3);
 
-        emit cardRead(cardSerialNumber.simplified());
+        emit cardRead(cardSerialNumber.left(10));
     }
 }

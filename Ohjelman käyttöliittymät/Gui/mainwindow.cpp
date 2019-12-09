@@ -7,7 +7,7 @@
 #include <QDebug>
 #include <QMessageBox>
 
-const QString PORT = "com3";
+const QString PORT = "COM3";
 
 using namespace std::placeholders;
 
@@ -75,6 +75,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
         ui->btnLogout, &QPushButton::clicked,
         this, &MainWindow::previousPage
     );
+    //mRFID->readData();
 }
 
 MainWindow::~MainWindow()
@@ -175,6 +176,7 @@ void MainWindow::cardRead(QString cardNumber)
     PinDialog *pin = new PinDialog(this);
 
     korttinumero = cardNumber;
+    qDebug() << korttinumero;
 
     ui->stackMain->setEnabled(false);
     pin->show();

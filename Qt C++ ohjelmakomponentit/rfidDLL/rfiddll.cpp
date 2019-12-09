@@ -31,7 +31,7 @@ void RfidDLL::initSerialPort(const QString& port)
 }
 
 
-void RfidDLL::readData()
+bool RfidDLL::readData()
 {
 
     if (m_serialPort->open(QIODevice::ReadWrite))
@@ -40,11 +40,12 @@ void RfidDLL::readData()
             m_serialPort, &QSerialPort::readyRead,
             this, &RfidDLL::onReadyRead
         );
+        return true;
     }
     else
     {
-        qDebug() << "Could not open a connection in port: "
-                 << m_serialPort->portName() << endl;
+        Logger("RfidDLL: Could not open a connection in port:" + m_serialPort->portName());
+        return false;
     }
 }
 
@@ -64,7 +65,9 @@ void RfidDLL::onReadyRead()
             cardSerialNumber = data;
         }
         cardSerialNumber.remove(0, 3);
+        QString cleanedCardNumber = cardSerialNumber.left(10);
 
-        emit cardRead(cardSerialNumber.left(10));
+        emit Logger("RfidDLL: Card read with number " + cleanedCardNumber);
+        emit cardRead(cleanedCardNumber);
     }
 }

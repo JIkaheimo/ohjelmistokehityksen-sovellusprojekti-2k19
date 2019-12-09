@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>547</width>
-    <height>357</height>
+    <width>1024</width>
+    <height>768</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,17 +19,28 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>1024</width>
+    <height>768</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1024</width>
+    <height>768</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>BankSimul</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">* {
-background-color: rgb(51, 51, 51);
-color: rgb(255, 255, 255);
+   <string notr="true">QLabel {
+	font-size: 15px;
 }
 
-
 QLabel#labelHeader {
+	font-size: 40px;
 	color: rgb(255, 170, 0);
 }
 
@@ -38,18 +49,13 @@ QLabel#labelBalance {
 }
 
 QPushButton {
-	background-color: rgb(51, 51, 51);
-	color: rgb(255, 255, 255);
-	padding:  5px;
-	border: 1px solid white;
-	border-radius: 5px
+	padding: 10px;
+	font-size: 15px;
 }
 
-QPushButton:disabled {
-	background-color: #ff0000;
-}</string>
+</string>
   </property>
-  <widget class="QWidget" name="mainLayout">
+  <widget class="QWidget" name="baseLayout">
    <layout class="QGridLayout" name="gridLayout_7">
     <item row="1" column="0">
      <layout class="QVBoxLayout" name="flowLayout">
@@ -96,12 +102,12 @@ QPushButton:disabled {
           </property>
           <property name="minimumSize">
            <size>
-            <width>0</width>
+            <width>9</width>
             <height>30</height>
            </size>
           </property>
           <property name="text">
-           <string>&lt;- BACK</string>
+           <string> BACK</string>
           </property>
          </widget>
         </item>
@@ -110,7 +116,7 @@ QPushButton:disabled {
           <property name="font">
            <font>
             <family>Algerian</family>
-            <pointsize>22</pointsize>
+            <pointsize>-1</pointsize>
            </font>
           </property>
           <property name="text">
@@ -124,85 +130,19 @@ QPushButton:disabled {
        </layout>
       </item>
       <item>
-       <widget class="QStackedWidget" name="stackMain">
-        <widget class="QWidget" name="pageRfid">
-         <widget class="QWidget" name="layoutWidget">
-          <property name="geometry">
-           <rect>
-            <x>130</x>
-            <y>90</y>
-            <width>251</width>
-            <height>121</height>
-           </rect>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_2">
-           <item>
-            <widget class="QLabel" name="label_2">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Start by entering your card to the reader. If nothing happens, click the &quot;Read RFID&quot; button</string>
-             </property>
-             <property name="scaledContents">
-              <bool>false</bool>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="wordWrap">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="verticalSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_2">
-             <item>
-              <widget class="QPushButton" name="btnReadRfid">
-               <property name="text">
-                <string>Read RFID</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btnTest">
-               <property name="text">
-                <string>Test user</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </widget>
+       <widget class="QStackedWidget" name="pageStack">
+        <widget class="QWidget" name="pageStart">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="layoutStart"/>
+          </item>
+         </layout>
         </widget>
         <widget class="QWidget" name="pageWithdrawal">
          <property name="sizePolicy">
@@ -224,75 +164,19 @@ QPushButton:disabled {
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="pageSummary">
+        <widget class="QWidget" name="pageEvents">
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="0">
-           <layout class="QVBoxLayout" name="verticalLayout_3">
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_4">
-              <item>
-               <widget class="QTableView" name="tableEvents"/>
-              </item>
-              <item>
-               <widget class="QLabel" name="label">
-                <property name="text">
-                 <string>Account balance:</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
+           <layout class="QGridLayout" name="layoutEvents"/>
           </item>
          </layout>
         </widget>
         <widget class="QWidget" name="pageMain">
-         <widget class="QPushButton" name="btnLogout">
-          <property name="geometry">
-           <rect>
-            <x>330</x>
-            <y>240</y>
-            <width>111</width>
-            <height>25</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Logout</string>
-          </property>
-         </widget>
-         <widget class="QWidget" name="layoutWidget">
-          <property name="geometry">
-           <rect>
-            <x>60</x>
-            <y>80</y>
-            <width>391</width>
-            <height>71</height>
-           </rect>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <item>
-            <widget class="QPushButton" name="btnToWIthdraw">
-             <property name="text">
-              <string>Withdraw</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnToDeposit">
-             <property name="text">
-              <string>Deposit</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnToSummary">
-             <property name="text">
-              <string>Events</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
+         <layout class="QGridLayout" name="gridLayout_8">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="layoutMain"/>
+          </item>
+         </layout>
         </widget>
        </widget>
       </item>

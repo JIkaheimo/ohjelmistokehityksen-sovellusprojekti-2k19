@@ -12,20 +12,19 @@ class PinDialog : public QDialog
     Q_OBJECT
 
 public:
-    const int PIN_SIZE = 4;
-
     explicit PinDialog(QWidget *parent = nullptr);
     ~PinDialog();
 
 signals:
-    void pinEntered(int pinCode);
+    void PinEntered(int pinCode);
+    void Timeout();
 
 private slots:
     void onNumberButtonClicked();
 
 private:
     Ui::PinDialog *ui;
-    QString pinKoodi = "";
+    QString mPinCode;
 
     void addButtonEvent(QPushButton*);
 };

@@ -14,8 +14,17 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
+   <item row="1" column="0">
     <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
      <item>
       <widget class="QLabel" name="labelDeposit">
        <property name="text">
@@ -27,14 +36,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="editDeposit">
-       <property name="text">
-        <string>0.0</string>
+      <widget class="QDoubleSpinBox" name="editDeposit">
+       <property name="maximum">
+        <double>10000.000000000000000</double>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="btnDeposit">
        <property name="text">
         <string>Deposit</string>
        </property>

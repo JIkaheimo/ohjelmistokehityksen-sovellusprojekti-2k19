@@ -1,84 +1,111 @@
 #include "databasedll.h"
 
-#include <QDebug>
-#include <QMessageBox>
 #include <QSqlQuery>
-#include <QSqlRelationalTableModel>
+
+const QString HOST_NAME = "mysli.oamk.fi";
+const QString USERNAME = "c8ikja00";
+const QString PASSWORD = "8uL4khDtm2H6H7ag";
+const QString DB_NAME = "opisk_c8ikja00";
+
+// CARD CONSTANTS
+const QString CARD_TABLE = "card";
+const QString CARD_ID = "id";
+const QString CARD_NUMBER = "identifier";
+const QString CARD_PIN = "pin";
+const QString CARD_ACCOUNT = "idAccount";
+
+// ACCOUNTS CONSTANTS
+const QString ACCOUNT_TABLE = "account";
+const QString ACCOUNT_ID = "id";
+const QString ACCOUNT_NUMBER = "number";
+const QString ACCOUNT_BALANCE = "balance";
+
+// EVENT CONSTANTS
+const QString EVENT_TABLE = "event";
+const QString EVENT_ID = "id";
+const QString EVENT_TYPE = "type";
+const QString EVENT_TIME = "time";
+const QString EVENT_AMOUNT = "amount";
+const QString EVENT_ACCOUNT = "idAccount";
+
+
 
 DatabaseDLL::DatabaseDLL(QObject *parent)
-    : QObject(parent)
+    : QObject(parent),
+      mDB(QSqlDatabase::addDatabase("QMYSQL")),
+      mAccount(new QSqlTableModel(this, mDB)),
+      mEvents(new QSqlTableModel(this, mDB))
 {
-}
+    mDB.setHostName(HOST_NAME);
+    mDB.setUserName(USERNAME);
+    mDB.setPassword(PASSWORD);
+    mDB.setDatabaseName(DB_NAME);
 
-
-bool DatabaseDLL::initConnection()
-/**
- * initConnection() - Initializes a connection to the database.
- *
- * @returns bool describing if the connection was succesfull.
- */
-{
-    db = QSqlDatabase::addDatabase("QMYSQL");
-    db.setHostName(HOST_NAME);
-    db.setUserName(USERNAME);
-    db.setPassword(PASSWORD);
-    db.setDatabaseName(DB_NAME);
-
-    if (db.open())
+    if (mDB.open())
     {
-        eventModel = new QSqlTableModel(this, db);
-        eventModel->setTable(EVENT_TABLE);
-        return true;
+        mAccount->setTable(ACCOUNT_TABLE);
+        mEvents->setTable(EVENT_TABLE);
     }
-    return false;
+    else
+    {
+        emit ErrorHappened("Could not connect to database.");
+    }
 }
+
+DatabaseDLL::~DatabaseDLL()
+{
+    if (mDB.isOpen()) mDB.close();
+}
+
 
 bool DatabaseDLL::login(QString cardNumber, int pin)
 /**
  * login(cardNumber, pin)
  */
 {
-    // Create the query string.
-    QString queryString = QString("SELECT * FROM %1 WHERE %2 = '%3' AND %4 = %5")
-            .arg(CARD_TABLE)
-            .arg(CARD_NUMBER).arg(cardNumber)
-            .arg(CARD_PIN).arg(pin);
+    QSqlTableModel cardModel;
 
-    // Submit the query.
-    QSqlQuery query(queryString);
+    cardModel.setTable(CARD_TABLE);
+    cardModel.setFilter(
+        QString("%1 = '%2' AND %3 = %4")
+            .arg(CARD_NUMBER)
+            .arg(cardNumber)
+            .arg(CARD_PIN)
+            .arg(pin)
+    );
 
-    if (query.first())
+    if (cardModel.select() && cardModel.rowCount() == 1)
     {
-        account = query.value(CARD_ACCOUNT).toInt();
-        eventModel->setFilter(QString("%1 = %2").arg(EVENT_ACCOUNT).arg(account));
-        eventModel->select();
+        QString accountID = cardModel.record(0).value(CARD_ACCOUNT).toString();
+
+        mEvents->setFilter("idAccount = " + accountID);
+        mAccount->setFilter("id = " + accountID);
+        mEvents->select();
+        mAccount->select();
+
+        emit Logger("DatabaseDLL: Login successful for account (ID): " + accountID);
+        emit BalanceChanged(getBalance());
+        emit UserAuthenticated();
+
         return true;
     }
     else
     {
+        emit Logger("DatabaseDLL: Login failed");
         return false;
     }
 }
 
 float DatabaseDLL::getBalance()
 {
-    QSqlQuery query;
-    query.prepare("SELECT balance FROM account WHERE id = ?");
-    query.addBindValue(account);
-
-    if (query.exec() && query.first())
-    {
-        return query.value(ACCOUNT_BALANCE).toFloat();
-    }
-
-    return -1.0;
+    return mAccount->record(0).value(ACCOUNT_BALANCE).toFloat();
 }
 
 bool DatabaseDLL::deposit(float depositAmount)
 {
     if (addToBalance(depositAmount))
     {
-        addEvent(DatabaseDLL::EVENT::DEPOSIT, depositAmount);
+        addEvent(EVENT::DEPOSIT, depositAmount);
         return true;
     }
     return false;
@@ -88,18 +115,18 @@ bool DatabaseDLL::deposit(float depositAmount)
 bool DatabaseDLL::withdraw(float withdrawAmount) {
     if (addToBalance(-withdrawAmount))
     {
-        addEvent(DatabaseDLL::EVENT::WITHDARWAL, withdrawAmount);
+        addEvent(EVENT::WITHDARWAL, withdrawAmount);
         return true;
     }
     return false;
 }
 
 
-void DatabaseDLL::addEvent(DatabaseDLL::EVENT evtType, float amount)
+void DatabaseDLL::addEvent(EVENT evtType, float amount)
 {
-    QString type = "";
+    QString type = "unknown";
 
-    if (evtType == DatabaseDLL::EVENT::DEPOSIT) {
+    if (evtType == EVENT::DEPOSIT) {
         type = "deposit";
     }
     else
@@ -111,50 +138,54 @@ void DatabaseDLL::addEvent(DatabaseDLL::EVENT evtType, float amount)
     QDateTime timestamp = QDateTime::currentDateTime();
 
     // Create and populate a new event record.
-    QSqlRecord event = eventModel->record();
+    QSqlRecord newEvent = mEvents->record();
 
-    event.setValue(EVENT_TYPE, type);
-    event.setValue(EVENT_ACCOUNT, account);
-    event.setValue(EVENT_TIME, timestamp.toString("yyyy-MM-dd hh:mm:ss"));
-    event.setValue(EVENT_AMOUNT, amount);
+    newEvent.setValue(EVENT_TYPE, type);
+    newEvent.setValue(EVENT_ACCOUNT, mAccount->record(0).value(ACCOUNT_ID));
+    newEvent.setValue(EVENT_TIME, timestamp.toString("yyyy-MM-dd hh:mm:ss"));
+    newEvent.setValue(EVENT_AMOUNT, amount);
 
-    eventModel->insertRecord(-1, event);
-    eventModel->submit();
-    eventModel->select();
+    mEvents->insertRecord(-1, newEvent);
+    mEvents->submitAll();
+
+    mEvents->select();
 }
 
 QSqlTableModel* DatabaseDLL::getEvents()
 {
-    return eventModel;
+    return mEvents;
 }
+
 
 bool DatabaseDLL::addToBalance(float amount)
 {
-    QSqlTableModel accountModel;
-    accountModel.setTable(ACCOUNT_TABLE);
-    accountModel.setFilter(QString("%1 = %2").arg(ACCOUNT_ID).arg(account));
-    accountModel.select();
 
-    if (accountModel.rowCount())
+    QVariant baseBalance = mAccount->record(0).value(ACCOUNT_BALANCE);
+    float newBalance = baseBalance.toFloat() + amount;
+
+    emit Logger("Balance: " + baseBalance.toString());
+
+    // Make sure the balance cannot be negative.
+    if (newBalance < 0)
     {
-        QSqlRecord record = accountModel.record(0);
-
-        float newBalance = record.value(ACCOUNT_BALANCE).toFloat() + amount;
-
-        // Make sure the balance cannot be negative.
-        if (newBalance < 0)
-        {
-            return false;
-        }
-
-
-        record.setValue(ACCOUNT_BALANCE, record.value(ACCOUNT_BALANCE).toInt() + amount);
-
-        accountModel.setRecord(0, record);
-        accountModel.submitAll();
-        emit BalanceChanged(record.value(ACCOUNT_BALANCE).toFloat());
-
-        return true;
+        return false;
     }
-    return false;
+
+    QSqlRecord record = mAccount->record(0);
+    record.setValue(ACCOUNT_BALANCE, record.value(ACCOUNT_BALANCE).toFloat() + amount);
+    mAccount->setRecord(0, record);
+
+    if (mAccount->submit())
+    {
+        mAccount->select();
+        emit Logger("DatabaseDLL: Balance succesfully updated");
+        emit BalanceChanged(newBalance);
+    }
+    else
+    {
+        emit Logger("DatabaseDLL: Could not update the balance, " + mDB.lastError().text());
+        return false;
+    }
+
+    return true;
 }

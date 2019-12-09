@@ -22,6 +22,9 @@ signals:
 public slots:
     void setWithdrawable(float amount);
 
+private slots:
+    void onXWithdrawal();
+
 private:
     Ui::WithdrawalView *ui;
     void connectWithdraw(QPushButton *button, float amount);

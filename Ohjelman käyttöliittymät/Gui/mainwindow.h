@@ -20,6 +20,7 @@ private:
 
     QStack<QWidget*> mPageHistory;
     QString mCardNumber = "";
+
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -37,6 +38,7 @@ private slots:
     void test();
 
     void setCurrentPage(QWidget& page);
+
 private:
     Ui::MainWindow *ui;
 
@@ -45,5 +47,8 @@ private:
     // View initializators
     void initWithdrawalView();
     void initDepositView();
+    void initEventView();
+    void initMainView();
+    void initStartView();
 };
 #endif // MAINWINDOW_H

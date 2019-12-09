@@ -11,22 +11,31 @@ LIBS += $$PWD\..\..\build\rfidDLL.dll
 SOURCES += \
     databasedll.cpp \
     depositview.cpp \
+    eventview.cpp \
     main.cpp \
+    mainview.cpp \
     mainwindow.cpp \
     pindialog.cpp \
+    startview.cpp \
     withdrawalview.cpp
 
 HEADERS += \
     databasedll.h \
     depositview.h \
+    eventview.h \
+    mainview.h \
     mainwindow.h \
     pindialog.h \
+    startview.h \
     withdrawalview.h
 
 FORMS += \
     depositview.ui \
+    eventview.ui \
+    mainview.ui \
     mainwindow.ui \
     pindialog.ui \
+    startview.ui \
     withdrawalview.ui
 
 # Default rules for deployment.

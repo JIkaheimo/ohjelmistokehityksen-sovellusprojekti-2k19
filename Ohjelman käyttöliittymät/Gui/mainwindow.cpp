@@ -1,13 +1,17 @@
-#include "depositview.h"
-#include "withdrawalview.h"
 #include "mainwindow.h"
 #include "pindialog.h"
 #include "ui_mainwindow.h"
 
-#include <QDebug>
-#include <QMessageBox>
+#include "eventview.h"
+#include "mainview.h"
+#include "depositview.h"
+#include "withdrawalview.h"
+#include "startview.h"
 
-const QString PORT = "com3";
+#include <QMessageBox>
+#include <QDebug>
+
+const QString PORT = "COM3";
 
 using namespace std::placeholders;
 
@@ -20,13 +24,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
 {
     ui->setupUi(this);
 
-    if (!mDB->initConnection())
-    {
-        QMessageBox::critical(this, "Connection Error",
-            "Could not connect to the database. Make sure you are in OAMK's network..."
-        );
-    }
-
     connect(
         mRFID, &RfidDLL::cardRead,
         this, &MainWindow::cardRead
@@ -37,51 +34,217 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
         this, &MainWindow::showBalance
     );
 
-    initWithdrawalView();
-    initDepositView();
-
-
-
-    connect(
-        ui->btnReadRfid, &QPushButton::clicked,
-        this, &MainWindow::readCard
-    );
-
-    connect(
-        ui->btnTest, &QPushButton::clicked,
-        this, &MainWindow::test
-    );
-
-    connect(
-        ui->btnToSummary, &QPushButton::clicked,
-        [this](){ setCurrentPage(*ui->pageSummary); }
-    );
-
-    connect(
-        ui->btnToWIthdraw, &QPushButton::clicked,
-        [this](){ setCurrentPage(*ui->pageWithdrawal); }
-    );
-
-    connect(
-        ui->btnToDeposit, &QPushButton::clicked,
-        [this](){ setCurrentPage(*ui->pageDeposit); }
-    );
-
-
     connect(
         ui->btnBack, &QPushButton::clicked,
         this, &MainWindow::previousPage
     );
 
+    // Enable logging, disable for release
     connect(
-        ui->btnLogout, &QPushButton::clicked,
-        this, &MainWindow::previousPage
+        mDB, &DatabaseDLL::Logger,
+        [](QString logged){ qDebug() << logged << endl; }
     );
+
+    connect(
+        mRFID, &RfidDLL::Logger,
+        [](QString logged){ qDebug() << logged << endl; }
+    );
+
+    initStartView();
+    initMainView();
+    initWithdrawalView();
+    initDepositView();
+    initEventView();
+    setCurrentPage(*ui->pageStart);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+
+
+/** VIEW INITIALIZATIONS */
+
+
+void MainWindow::initMainView()
+/**
+  * Initializes MainView with any required connections.
+  */
+{
+
+    // Create view.
+    MainView* mainView = new MainView(this);
+    ui->layoutMain->addWidget(mainView);
+
+    // Navigation connections.
+    connect(
+        mainView, &MainView::ToWithdrawal,
+        [this]{ setCurrentPage(*ui->pageWithdrawal); }
+    );
+
+    connect(
+        mainView, &MainView::ToEvents,
+        [this]{ setCurrentPage(*ui->pageEvents); }
+    );
+
+    connect(
+        mainView, &MainView::ToDeposit,
+        [this]{ setCurrentPage(*ui->pageDeposit); }
+    );
+}
+
+void MainWindow::initStartView()
+/**
+  * Initializes StartView with any required connections.
+  */
+{
+
+    // Create view.
+    StartView* startView = new StartView(this);
+    ui->layoutStart->addWidget(startView);
+
+    connect(
+        startView, &StartView::ReadCard,
+        this, &MainWindow::readCard
+    );
+
+    connect(
+        startView, &StartView::TestLogin,
+        this, &MainWindow::test
+    );
+
+}
+
+
+void MainWindow::initWithdrawalView()
+/**
+  * Initializes WithdrawalView with any required connections.
+  */
+{
+    // Create view.
+    WithdrawalView* withdrawalView = new WithdrawalView(this);
+    ui->layoutWithdrawal->addWidget(withdrawalView);
+
+    // Listen for any withdrawal events.
+    connect(
+        withdrawalView, &WithdrawalView::Withdraw,
+        this, &MainWindow::withdraw
+    );
+
+    // Update withdrawal controls based on the account balance.
+    connect(
+        mDB, &DatabaseDLL::BalanceChanged,
+        withdrawalView, &WithdrawalView::setWithdrawable
+    );
+}
+
+
+void MainWindow::initDepositView()
+/**
+  * Initializes DepositView with any required connections.
+  */
+{
+    // Create view.
+    DepositView* depositView = new DepositView(this);
+    ui->layoutDeposit->addWidget(depositView);
+
+    // Listen for any deposit events.
+    connect(
+        depositView, &DepositView::Deposit,
+        this, &MainWindow::deposit
+    );
+}
+
+
+void MainWindow::initEventView()
+/**
+  * Initializes EventView with any required connections.
+  */
+{
+    // Create view.
+    EventView* eventView = new EventView(this);
+    ui->layoutEvents->addWidget(eventView);
+
+    // Listen for any login events.
+    connect(
+        mDB, &DatabaseDLL::UserAuthenticated,
+        [this, eventView](){ eventView->setEvents(mDB->getEvents()); }
+    );
+}
+
+
+void MainWindow::setCurrentPage(QWidget& page)
+{
+    // Save the previous page to page history.
+
+    QWidget* currentPage = ui->pageStack->currentWidget();
+    mPageHistory.push(currentPage);
+    ui->pageStack->setCurrentWidget(&page);
+
+    ui->btnBack->show();
+
+    if (&page == ui->pageStart)
+    {
+        ui->btnBack->hide();
+        ui->labelBalance->setText("");
+    }
+    else if (&page == ui->pageMain)
+    {
+        ui->btnBack->setText("Logout");
+    }
+    else
+    {
+        ui->btnBack->setText("Back");
+    }
+}
+
+void MainWindow::previousPage()
+{
+    if (!mPageHistory.isEmpty())
+    {
+        QWidget* previousPage = mPageHistory.pop();
+        ui->pageStack->setCurrentWidget(previousPage);
+    }
+}
+
+
+void MainWindow::readCard()
+{
+   mRFID->readData();
+}
+
+void MainWindow::test()
+{
+    cardRead("0A0079C7BF");
+}
+
+void MainWindow::cardRead(QString cardNumber)
+{
+    PinDialog *pin = new PinDialog(this);
+
+    mCardNumber = cardNumber;
+    connect(pin, &PinDialog::pinEntered, this, &MainWindow::pinEntered);
+
+    pin->exec();
+}
+
+
+void MainWindow::pinEntered(int pinCode)
+{
+    qDebug() << QString("MainWindow: Pin entered %1").arg(pinCode);
+
+    if (mDB->login(mCardNumber, pinCode))
+    {
+        setCurrentPage(*ui->pageMain);
+        showBalance(mDB->getBalance());
+    }
+    else
+    {
+        previousPage();
+    }
+
 }
 
 void MainWindow::showBalance(float balance)
@@ -115,99 +278,5 @@ void MainWindow::deposit(float depositAmount)
     }
 }
 
-
-void MainWindow::initWithdrawalView()
-/**
-  * Initializes WithdrawalView with any required connections.
-  */
-{
-    // Create view.
-    WithdrawalView* withdrawalView = new WithdrawalView(this);
-    ui->layoutWithdrawal->addWidget(withdrawalView);
-
-    // Listen for any withdrawal events.
-    connect(
-        withdrawalView, &WithdrawalView::Withdraw,
-        this, &MainWindow::withdraw
-    );
-
-    // Update withdrawal controls based on the account balance.
-    connect(
-        mDB, &DatabaseDLL::BalanceChanged,
-        withdrawalView, &WithdrawalView::setWithdrawable
-    );
-}
-
-void MainWindow::initDepositView()
-/**
-  * Initializes DeposView with any required connections.
-  */
-{
-    // Initialize deposit view.
-    DepositView* depositView = new DepositView(this);
-    ui->layoutDeposit->addWidget(depositView);
-
-    // Listen for any deposit events.
-    connect(
-        depositView, &DepositView::Deposit,
-        this, &MainWindow::deposit
-    );
-}
-
-void MainWindow::setCurrentPage(QWidget& page)
-{
-    // Save the previous page to page history.
-    mPageHistory.push(ui->stackMain->currentWidget());
-    ui->stackMain->setCurrentWidget(&page);
-}
-
-void MainWindow::previousPage()
-{
-    if (!mPageHistory.isEmpty())
-    {
-        QWidget* previousPage = mPageHistory.pop();
-        ui->stackMain->setCurrentWidget(previousPage);
-    }
-}
-
-
-void MainWindow::readCard()
-{
-   mRFID->readData();
-}
-
-void MainWindow::test()
-{
-    cardRead("0A0079C7BF");
-}
-
-void MainWindow::cardRead(QString cardNumber)
-{
-    PinDialog *pin = new PinDialog(this);
-
-    mCardNumber = cardNumber;
-    connect(pin, &PinDialog::pinEntered, this, &MainWindow::pinEntered);
-
-    pin->exec();
-
-
-}
-
-
-void MainWindow::pinEntered(int pinCode)
-{
-    qDebug() << pinCode;
-    if (mDB->login(mCardNumber, pinCode))
-    {
-        setCurrentPage(*ui->pageMain);
-        showBalance(mDB->getBalance());
-        ui->tableEvents->setModel(mDB->getEvents());
-    }
-    else
-    {
-        previousPage();
-    }
-
-}
 
 

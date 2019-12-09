@@ -12,10 +12,12 @@ class RFIDDLLSHARED_EXPORT RfidDLL : public QObject
 
 public:
     explicit RfidDLL(const QString& portNumber, QObject *parent = nullptr);
-    void readData();
+    ~RfidDLL();
+    bool readData();
 
 signals:
     void cardRead(QString data);
+    void Logger(QString logged);
 
 private slots:
     void onReadyRead();

@@ -1,9 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "aloitusview.h"
 #include "databasedll.h"
-#include "koontiview.h"
 #include <rfiddll.h>
 
 #include <QMainWindow>
@@ -17,9 +15,10 @@ class MainWindow : public QMainWindow
 
     Q_OBJECT
 private:
-    DatabaseDLL* db;
-    RfidDLL* rfid;
+    DatabaseDLL* mDB;
+    RfidDLL* mRFID;
 
+    QStack<QWidget*> mPageHistory;
     QString korttinumero = "";
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -28,11 +27,23 @@ public:
 private slots:
 
     void pinLuettu(QString pinKoodi);
-    void suoritaTalletus(float);
+    void withdraw(float amount);
+    void deposit(float amount);
+
+    void previousPage();
 
     void cardRead(QString cardNumber);
     void readCard();
+    void test();
+
+    void setCurrentPage(QWidget& page);
 private:
     Ui::MainWindow *ui;
+
+    void showBalance(float balance);
+
+    // View initializators
+    void initWithdrawalView();
+    void initDepositView();
 };
 #endif // MAINWINDOW_H

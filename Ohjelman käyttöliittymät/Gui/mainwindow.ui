@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -10,36 +13,120 @@
     <height>357</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>BankSimul</string>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">* {
+background-color: rgb(51, 51, 51);
+color: rgb(255, 255, 255);
+}
+
+
+QLabel#labelHeader {
+	color: rgb(255, 170, 0);
+}
+
+QLabel#labelBalance {
+	font-size: 14px;
+}
+
+QPushButton {
+	background-color: rgb(51, 51, 51);
+	color: rgb(255, 255, 255);
+	padding:  5px;
+	border: 1px solid white;
+	border-radius: 5px
+}
+
+QPushButton:disabled {
+	background-color: #ff0000;
+}</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
+  <widget class="QWidget" name="mainLayout">
+   <layout class="QGridLayout" name="gridLayout_7">
+    <item row="1" column="0">
+     <layout class="QVBoxLayout" name="flowLayout">
       <item>
-       <widget class="QLabel" name="labelHeader">
-        <property name="font">
-         <font>
-          <family>Algerian</family>
-          <pointsize>22</pointsize>
-         </font>
+       <layout class="QGridLayout" name="gridLayout_6">
+        <property name="leftMargin">
+         <number>5</number>
         </property>
-        <property name="text">
-         <string>BankSimul</string>
+        <property name="topMargin">
+         <number>0</number>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
+        <property name="rightMargin">
+         <number>5</number>
         </property>
-       </widget>
+        <property name="horizontalSpacing">
+         <number>0</number>
+        </property>
+        <item row="0" column="1">
+         <widget class="QLabel" name="labelBalance">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Balance is shown here</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="btnBack">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>&lt;- BACK</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0" colspan="2">
+         <widget class="QLabel" name="labelHeader">
+          <property name="font">
+           <font>
+            <family>Algerian</family>
+            <pointsize>22</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>BankSimul</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <widget class="QStackedWidget" name="stackMain">
         <widget class="QWidget" name="pageRfid">
-         <widget class="QWidget" name="">
+         <widget class="QWidget" name="layoutWidget">
           <property name="geometry">
            <rect>
             <x>130</x>
@@ -106,9 +193,9 @@
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_2">
+              <widget class="QPushButton" name="btnTest">
                <property name="text">
-                <string>Use test user</string>
+                <string>Test user</string>
                </property>
               </widget>
              </item>
@@ -117,7 +204,96 @@
           </layout>
          </widget>
         </widget>
-        <widget class="QWidget" name="pageMain"/>
+        <widget class="QWidget" name="pageWithdrawal">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="layoutWithdrawal"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pageDeposit">
+         <layout class="QGridLayout" name="gridLayout_9">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="layoutDeposit"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pageSummary">
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+               <widget class="QTableView" name="tableEvents"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="label">
+                <property name="text">
+                 <string>Account balance:</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pageMain">
+         <widget class="QPushButton" name="btnLogout">
+          <property name="geometry">
+           <rect>
+            <x>330</x>
+            <y>240</y>
+            <width>111</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Logout</string>
+          </property>
+         </widget>
+         <widget class="QWidget" name="layoutWidget">
+          <property name="geometry">
+           <rect>
+            <x>60</x>
+            <y>80</y>
+            <width>391</width>
+            <height>71</height>
+           </rect>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <widget class="QPushButton" name="btnToWIthdraw">
+             <property name="text">
+              <string>Withdraw</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnToDeposit">
+             <property name="text">
+              <string>Deposit</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnToSummary">
+             <property name="text">
+              <string>Events</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
        </widget>
       </item>
      </layout>

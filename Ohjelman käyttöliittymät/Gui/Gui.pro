@@ -9,25 +9,25 @@ DEFINES += QT_DEPRECATED_WARNINGS
 LIBS += $$PWD\..\..\build\rfidDLL.dll
 
 SOURCES += \
-    aloitusview.cpp \
     databasedll.cpp \
-    koontiview.cpp \
+    depositview.cpp \
     main.cpp \
     mainwindow.cpp \
-    pindialog.cpp
+    pindialog.cpp \
+    withdrawalview.cpp
 
 HEADERS += \
-    aloitusview.h \
     databasedll.h \
-    koontiview.h \
+    depositview.h \
     mainwindow.h \
-    pindialog.h
+    pindialog.h \
+    withdrawalview.h
 
 FORMS += \
-    aloitusview.ui \
-    koontiview.ui \
+    depositview.ui \
     mainwindow.ui \
-    pindialog.ui
+    pindialog.ui \
+    withdrawalview.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

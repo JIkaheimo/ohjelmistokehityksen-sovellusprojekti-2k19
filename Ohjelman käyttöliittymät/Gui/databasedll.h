@@ -21,10 +21,10 @@ private:
 
     // DATABASE CONFIGS
     // TODO: Change these for oamk.mysli connection
-    const QString HOST_NAME = "127.0.0.1";
-    const QString USERNAME = "root";
-    const QString PASSWORD = "";
-    const QString DB_NAME = "banksimul";
+    const QString HOST_NAME = "mysli.oamk.fi";
+    const QString USERNAME = "c8ikja00";
+    const QString PASSWORD = "8uL4khDtm2H6H7ag";
+    const QString DB_NAME = "opisk_c8ikja00";
 
     // CARD CONSTANTS
     const QString CARD_TABLE = "card";
@@ -58,6 +58,10 @@ public:
     bool login(QString cardNumber, int pin);
     bool deposit(float depositAmount);
     bool withdraw(float withdrawAmount);
+
+    float getBalance();
+signals:
+    void BalanceChanged(float newBalance);
 
 private:
     void addEvent(DatabaseDLL::EVENT type, float amount);

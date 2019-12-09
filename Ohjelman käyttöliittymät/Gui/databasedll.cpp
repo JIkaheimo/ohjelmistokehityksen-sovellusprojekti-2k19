@@ -39,22 +39,19 @@ bool DatabaseDLL::login(QString cardNumber, int pin)
  */
 {
     // Create the query string.
-    QString queryString = QString("SELECT * FROM %1 WHERE %2 = %3 AND %4 = %5")
+    QString queryString = QString("SELECT * FROM %1 WHERE %2 = '%3' AND %4 = %5")
             .arg(CARD_TABLE)
             .arg(CARD_NUMBER).arg(cardNumber)
             .arg(CARD_PIN).arg(pin);
 
     // Submit the query.
     QSqlQuery query(queryString);
-    qDebug() << queryString;
-    // Check if the card was valid and get the linked account id.
+
     if (query.first())
     {
         account = query.value(CARD_ACCOUNT).toInt();
-        qDebug() << QString("%1 = %2").arg(EVENT_ACCOUNT).arg(account);
         eventModel->setFilter(QString("%1 = %2").arg(EVENT_ACCOUNT).arg(account));
         eventModel->select();
-        qDebug() << eventModel->rowCount();
         return true;
     }
     else
@@ -63,7 +60,19 @@ bool DatabaseDLL::login(QString cardNumber, int pin)
     }
 }
 
+float DatabaseDLL::getBalance()
+{
+    QSqlQuery query;
+    query.prepare("SELECT balance FROM account WHERE id = ?");
+    query.addBindValue(account);
 
+    if (query.exec() && query.first())
+    {
+        return query.value(ACCOUNT_BALANCE).toFloat();
+    }
+
+    return -1.0;
+}
 
 bool DatabaseDLL::deposit(float depositAmount)
 {
@@ -116,8 +125,6 @@ void DatabaseDLL::addEvent(DatabaseDLL::EVENT evtType, float amount)
 
 QSqlTableModel* DatabaseDLL::getEvents()
 {
-    qDebug() << "haaetaanTavarara";
-    qDebug() << eventModel->rowCount();
     return eventModel;
 }
 
@@ -131,9 +138,22 @@ bool DatabaseDLL::addToBalance(float amount)
     if (accountModel.rowCount())
     {
         QSqlRecord record = accountModel.record(0);
+
+        float newBalance = record.value(ACCOUNT_BALANCE).toFloat() + amount;
+
+        // Make sure the balance cannot be negative.
+        if (newBalance < 0)
+        {
+            return false;
+        }
+
+
         record.setValue(ACCOUNT_BALANCE, record.value(ACCOUNT_BALANCE).toInt() + amount);
+
         accountModel.setRecord(0, record);
         accountModel.submitAll();
+        emit BalanceChanged(record.value(ACCOUNT_BALANCE).toFloat());
+
         return true;
     }
     return false;

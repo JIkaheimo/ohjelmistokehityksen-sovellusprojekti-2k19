@@ -31,11 +31,11 @@ const QString EVENT_ACCOUNT = "idAccount";
 const QString DEPOSIT_ERROR = "Could not deposit funds to account.";
 
 
-DatabaseDLL::DatabaseDLL(QObject *parent)
-    : QObject(parent),
+DatabaseDLL::DatabaseDLL()
+    :
       mDB(QSqlDatabase::addDatabase("QMYSQL")),
-      mAccount(new QSqlTableModel(this, mDB)),
-      mEvents(new QSqlTableModel(this, mDB))
+      mAccount(new QSqlTableModel(nullptr, mDB)),
+      mEvents(new QSqlTableModel(nullptr, mDB))
 {
     mDB.setHostName(HOST_NAME);
     mDB.setUserName(USERNAME);
@@ -56,6 +56,12 @@ DatabaseDLL::DatabaseDLL(QObject *parent)
 DatabaseDLL::~DatabaseDLL()
 {
     if (mDB.isOpen()) mDB.close();
+
+    delete mAccount;
+    mAccount = nullptr;
+
+    delete mEvents;
+    mEvents = nullptr;
 }
 
 

@@ -16,7 +16,7 @@ public:
     ~StartView();
 
 signals:
-    void ReadCard();
+    void readData();
     void TestLogin();
 
 private:

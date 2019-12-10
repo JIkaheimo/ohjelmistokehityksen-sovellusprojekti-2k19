@@ -48,6 +48,8 @@ private:
 
     void showBalance(float balance);
 
+    void initRfid();
+
     // View initializators
     void initWithdrawalView();
     void initDepositView();
@@ -56,5 +58,6 @@ private:
     void initStartView();
 
     void showPage(QWidget &page);
+
 };
 #endif // MAINWINDOW_H

@@ -30,12 +30,6 @@ MainWindow::MainWindow(QWidget *parent):
 {
     ui->setupUi(this);
 
-
-    connect(
-        mRFID, &RfidDLL::CardRead,
-        this, &MainWindow::cardRead
-    );
-
     connect(
         mDB, &DatabaseDLL::BalanceChanged,
         this, &MainWindow::showBalance
@@ -72,17 +66,6 @@ MainWindow::MainWindow(QWidget *parent):
         this, &MainWindow::displayError
     );
 
-    connect(
-        mRFID, &RfidDLL::Logger,
-        [this](QString logged){ logger("RfidDLL", logged); }
-    );
-
-    connect(
-        mRFID, &RfidDLL::ErrorHappened,
-        this, &MainWindow::displayError
-    );
-
-    //mRFID->readData(PORT);
 
     initStartView();
     initMainView();
@@ -90,7 +73,10 @@ MainWindow::MainWindow(QWidget *parent):
     initDepositView();
     initEventView();
     setCurrentPage(*ui->pageStart);
-    mRFID->readData(PORT);
+
+    show();
+
+    initRfid();
 }
 
 MainWindow::~MainWindow()
@@ -104,6 +90,27 @@ MainWindow::~MainWindow()
     mPin = nullptr;
 }
 
+
+void MainWindow::initRfid()
+{
+    connect(
+        mRFID, &RfidDLL::Logger,
+        [this](QString logged){ logger("RfidDLL", logged); }
+    );
+
+    connect(
+        mRFID, &RfidDLL::ErrorHappened,
+        this, &MainWindow::displayError
+    );
+
+    if (mRFID->readData(PORT))
+    {
+        connect(
+            mRFID, &RfidDLL::CardRead,
+            this, &MainWindow::cardRead
+        );
+    }
+}
 
 
 /** VIEW INITIALIZATIONS */

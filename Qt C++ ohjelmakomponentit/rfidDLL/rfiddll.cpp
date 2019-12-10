@@ -68,6 +68,6 @@ void RfidDLL::onReadyRead()
         QString cleanedCardNumber = cardSerialNumber.left(10);
 
         emit Logger("RfidDLL: Card read with number " + cleanedCardNumber);
-        emit cardRead(cleanedCardNumber);
+        emit CardRead(cleanedCardNumber);
     }
 }

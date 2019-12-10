@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "pindialog.h"
 #include "ui_mainwindow.h"
 
 #include "eventview.h"
@@ -11,6 +10,7 @@
 #include <QMessageBox>
 #include <QDebug>
 
+
 const QString PORT = "COM3";
 
 using namespace std::placeholders;
@@ -18,6 +18,7 @@ using namespace std::placeholders;
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
     mDB(new DatabaseDLL(this)),
     mRFID(new RfidDLL(PORT, this)),
+    mPin(new PinDLL()),
     mPageHistory(),
 
     ui(new Ui::MainWindow)
@@ -25,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
     ui->setupUi(this);
 
     connect(
-        mRFID, &RfidDLL::cardRead,
+        mRFID, &RfidDLL::CardRead,
         this, &MainWindow::cardRead
     );
 
@@ -35,14 +36,32 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
     );
 
     connect(
+        mPin, &PinDLL::PinEntered,
+        this, &MainWindow::pinEntered
+    );
+
+
+    connect(
         ui->btnBack, &QPushButton::clicked,
         this, &MainWindow::previousPage
     );
 
     // Enable logging, disable for release
     connect(
+        mPin, &PinDLL::Logger,
+        [](QString source, QString desc){
+            qDebug() << QString("%1 '%2'").arg(source).arg(desc);
+        }
+    );
+
+    connect(
         mDB, &DatabaseDLL::Logger,
         [](QString logged){ qDebug() << logged << endl; }
+    );
+
+    connect(
+        mDB, &DatabaseDLL::ErrorHappened,
+        [this](QString message){ QMessageBox::warning(this, "Database Error", message); }
     );
 
     connect(
@@ -60,7 +79,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
 
 MainWindow::~MainWindow()
 {
+    delete mPin;
     delete ui;
+    mPin = nullptr;
 }
 
 
@@ -100,7 +121,6 @@ void MainWindow::initStartView()
   * Initializes StartView with any required connections.
   */
 {
-
     // Create view.
     StartView* startView = new StartView(this);
     ui->layoutStart->addWidget(startView);
@@ -222,19 +242,13 @@ void MainWindow::test()
 
 void MainWindow::cardRead(QString cardNumber)
 {
-    PinDialog *pin = new PinDialog(this);
-
     mCardNumber = cardNumber;
-    connect(pin, &PinDialog::pinEntered, this, &MainWindow::pinEntered);
-
-    pin->exec();
+    mPin->getPin(this);
 }
 
 
 void MainWindow::pinEntered(int pinCode)
 {
-    qDebug() << QString("MainWindow: Pin entered %1").arg(pinCode);
-
     if (mDB->login(mCardNumber, pinCode))
     {
         setCurrentPage(*ui->pageMain);

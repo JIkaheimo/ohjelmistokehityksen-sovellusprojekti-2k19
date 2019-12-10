@@ -91,13 +91,14 @@ bool DatabaseDLL::login(QString cardNumber, int pin)
     }
     else
     {
-        emit Logger("DatabaseDLL: Login failed");
+        emit ErrorHappened("DatabaseDLL:login 'Login failed'");
         return false;
     }
 }
 
 float DatabaseDLL::getBalance()
 {
+    if (!mAccount->select());
     return mAccount->record(0).value(ACCOUNT_BALANCE).toFloat();
 }
 
@@ -152,7 +153,16 @@ void DatabaseDLL::addEvent(EVENT evtType, float amount)
 }
 
 QSqlTableModel* DatabaseDLL::getEvents()
+/**
+  * Returns the events for the account being used.
+  */
 {
+    if (!mEvents->select())
+        emit ErrorHappened("DatabaseDLL:getEvents 'Error getting events.'");
+
+    if (!mEvents->rowCount())
+        emit Logger("DatabaseDLL:getEvents 'No events available.'");
+
     return mEvents;
 }
 
@@ -171,6 +181,7 @@ bool DatabaseDLL::addToBalance(float amount)
         return false;
     }
 
+    // Update the record
     QSqlRecord record = mAccount->record(0);
     record.setValue(ACCOUNT_BALANCE, record.value(ACCOUNT_BALANCE).toFloat() + amount);
     mAccount->setRecord(0, record);
@@ -183,7 +194,7 @@ bool DatabaseDLL::addToBalance(float amount)
     }
     else
     {
-        emit Logger("DatabaseDLL: Could not update the balance, " + mDB.lastError().text());
+        emit ErrorHappened("DatabaseDLL:addToBalance 'Error updating account balance.'");
         return false;
     }
 

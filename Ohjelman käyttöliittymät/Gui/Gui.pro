@@ -7,6 +7,7 @@ CONFIG += c++11
 DEFINES += QT_DEPRECATED_WARNINGS
 
 LIBS += $$PWD\..\..\build\rfidDLL.dll
+LIBS += $$PWD\..\..\build\pinDLL.dll
 
 SOURCES += \
     databasedll.cpp \

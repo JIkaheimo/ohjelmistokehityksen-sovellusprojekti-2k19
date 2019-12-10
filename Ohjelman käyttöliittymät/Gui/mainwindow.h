@@ -2,13 +2,15 @@
 #define MAINWINDOW_H
 
 #include "databasedll.h"
-#include <rfiddll.h>
 
 #include <QMainWindow>
+#include <pindll.h>
+#include <rfiddll.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+
 
 class MainWindow : public QMainWindow
 {
@@ -17,6 +19,7 @@ class MainWindow : public QMainWindow
 private:
     DatabaseDLL* mDB;
     RfidDLL* mRFID;
+    PinDLL* mPin;
 
     QStack<QWidget*> mPageHistory;
     QString mCardNumber = "";

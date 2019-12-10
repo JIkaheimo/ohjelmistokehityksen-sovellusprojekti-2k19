@@ -16,7 +16,7 @@ public:
     bool readData();
 
 signals:
-    void cardRead(QString data);
+    void CardRead(QString data);
     void Logger(QString logged);
 
 private slots:

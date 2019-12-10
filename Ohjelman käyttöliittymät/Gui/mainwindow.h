@@ -3,9 +3,9 @@
 
 #include <QMainWindow>
 
-#include <databasedll.h>
-#include <rfiddll.h>
-#include <pindll.h>
+#include "databasedll.h"
+#include "rfiddll.h"
+#include "pindll.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

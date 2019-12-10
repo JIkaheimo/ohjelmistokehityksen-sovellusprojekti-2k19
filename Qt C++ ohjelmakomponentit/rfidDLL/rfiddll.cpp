@@ -41,19 +41,17 @@ bool RfidDLL::readData(const QString& port)
 
     if (m_serialPort->isOpen() || initSerialPort(port))
     {
+        connect(
+            m_serialPort, &QSerialPort::readyRead,
+            this, &RfidDLL::onReadyRead
+        );
         emit Logger(PORT_READING.arg(port));
+
         return true;
     }
-    else
-    {
-        emit Logger(PORT_FAIL.arg(port));
-        emit ErrorHappened(PORT_FAIL.arg(port));
-    }
 
-    connect(
-        m_serialPort, &QSerialPort::readyRead,
-        this, &RfidDLL::onReadyRead
-    );
+    emit Logger(PORT_FAIL.arg(port));
+    emit ErrorHappened(PORT_FAIL.arg(port));
 
     return false;
 }
@@ -73,17 +71,14 @@ void RfidDLL::onReadyRead()
         {
             cardSerialNumber = data;
         }
-
         cardSerialNumber.remove(0, 3);
-        cardSerialNumber = cardSerialNumber.left(10);
+        QString cleanedCardNumber = cardSerialNumber.left(10);
 
-        emit Logger(CARD_READ.arg(cardSerialNumber));
+        emit Logger(CARD_READ.arg(cleanedCardNumber));
+        emit CardRead(cleanedCardNumber);
 
+    } else {
+
+        emit Logger("Unable to read card.");
     }
-    else
-    {
-        emit Logger("Error reading card");
-    }
-
-    emit CardRead(cardSerialNumber);
 }

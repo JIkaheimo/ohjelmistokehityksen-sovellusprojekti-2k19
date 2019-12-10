@@ -7,27 +7,36 @@ namespace Ui {
 class PinDialog;
 }
 
+class QTimer;
+
 class PinDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    const int PIN_SIZE = 4;
-
     explicit PinDialog(QWidget *parent = nullptr);
     ~PinDialog();
 
 signals:
-    void pinEntered(QString pin);
+    void PinEntered(int pinCode);
+    void Logger(QString logged);
+    void Timeout();
 
 private slots:
     void onNumberButtonClicked();
+    void onOkClicked();
+    void onBackspaceClicked();
+    void onTimeout();
 
 private:
     Ui::PinDialog *ui;
-    QString pinKoodi = "";
 
-    void addButtonEvent(QPushButton*);
+    QList<QPushButton *> mNumberButtons;
+
+    QString mPinCode;
+    QTimer* mTimer;
+
+    void updateButtons();
 };
 
 #endif // PINDIALOG_H

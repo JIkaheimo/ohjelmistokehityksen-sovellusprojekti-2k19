@@ -28,3 +28,4 @@ unix {
 }
 
 DESTDIR = $$PWD\..\..\build\
+

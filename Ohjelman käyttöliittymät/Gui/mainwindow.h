@@ -1,39 +1,57 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "aloitusview.h"
 #include "databasedll.h"
-#include "koontiview.h"
-#include <rfiddll.h>
 
 #include <QMainWindow>
+#include <pindll.h>
+#include <rfiddll.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+
 class MainWindow : public QMainWindow
 {
+
     Q_OBJECT
 private:
-    DatabaseDLL* db;
-    RfidDLL* rfid;
+    DatabaseDLL* mDB;
+    RfidDLL* mRFID;
+    PinDLL* mPin;
 
-    AloitusView* aloitusNakyma;
-    KoontiView* koontiNakyma;
+    QStack<QWidget*> mPageHistory;
+    QString mCardNumber = "";
 
-    QString korttinumero = "";
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
 
-    void pinLuettu(QString pinKoodi);
-    void suoritaTalletus(float);
+    void pinEntered(int pinCode);
+    void withdraw(float amount);
+    void deposit(float amount);
+
+    void previousPage();
 
     void cardRead(QString cardNumber);
+    void readCard();
+    void test();
+
+    void setCurrentPage(QWidget& page);
+
 private:
     Ui::MainWindow *ui;
+
+    void showBalance(float balance);
+
+    // View initializators
+    void initWithdrawalView();
+    void initDepositView();
+    void initEventView();
+    void initMainView();
+    void initStartView();
 };
 #endif // MAINWINDOW_H

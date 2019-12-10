@@ -73,12 +73,15 @@ void RfidDLL::onReadyRead()
         {
             cardSerialNumber = data;
         }
+
         cardSerialNumber.remove(0, 3);
         cardSerialNumber = cardSerialNumber.left(10);
 
         emit Logger(CARD_READ.arg(cardSerialNumber));
 
-    } else {
+    }
+    else
+    {
         emit Logger("Error reading card");
     }
 

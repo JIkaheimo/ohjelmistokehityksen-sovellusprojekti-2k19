@@ -21,7 +21,7 @@ using namespace std::placeholders;
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
 
-    mDB(new DatabaseDLL(this)),
+    mDB(new DatabaseDLL()),
     mRFID(new RfidDLL()),
     mPin(new PinDLL()),
     mPageHistory(),
@@ -87,6 +87,9 @@ MainWindow::~MainWindow()
 
     delete mPin;
     mPin = nullptr;
+
+    delete mDB;
+    mDB = nullptr;
 }
 
 

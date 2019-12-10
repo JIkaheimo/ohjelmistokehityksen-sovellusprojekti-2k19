@@ -1,26 +1,18 @@
 #include "rfiddll.h"
 
+const QString PORT_INITIALIZING = "Initializing connection in port %1.";
+const QString PORT_READING = "Succesfully connected to port %1.";
+const QString PORT_FAIL = "Could not open a connection in port %1.";
 
-RfidDLL::RfidDLL(const QString& port, QObject *parent)
-    : QObject(parent)
-{
-    initSerialPort(port);
-    readData();
+const QString CARD_READ = "Card read with number %1.";
 
-    // Dummy test
-    onReadyRead();
-}
-
-RfidDLL::~RfidDLL()
-{
-    m_serialPort->close();
-}
-
-void RfidDLL::initSerialPort(const QString& port)
+bool RfidDLL::initSerialPort(const QString& port)
 /**
  * Initializes serial port for reading data.
  */
 {
+    emit Logger(PORT_INITIALIZING.arg(port));
+
     m_serialPort = new QSerialPort(this);
     m_serialPort->setPortName(port);
     m_serialPort->setBaudRate(QSerialPort::Baud9600);
@@ -28,25 +20,28 @@ void RfidDLL::initSerialPort(const QString& port)
     m_serialPort->setParity(QSerialPort::NoParity);
     m_serialPort->setStopBits(QSerialPort::OneStop);
     m_serialPort->setFlowControl(QSerialPort::HardwareControl);
+
+    return m_serialPort->open(QIODevice::ReadWrite);
 }
 
 
-bool RfidDLL::readData()
+bool RfidDLL::readData(const QString& port)
 {
-
-    if (m_serialPort->open(QIODevice::ReadWrite))
+    if (initSerialPort(port))
     {
         connect(
             m_serialPort, &QSerialPort::readyRead,
             this, &RfidDLL::onReadyRead
         );
+        emit Logger(PORT_READING);
+
         return true;
     }
-    else
-    {
-        Logger("RfidDLL: Could not open a connection in port:" + m_serialPort->portName());
-        return false;
-    }
+
+    emit Logger(PORT_FAIL.arg(port));
+    emit ErrorHappened(PORT_FAIL.arg(port));
+
+    return false;
 }
 
 
@@ -67,7 +62,10 @@ void RfidDLL::onReadyRead()
         cardSerialNumber.remove(0, 3);
         QString cleanedCardNumber = cardSerialNumber.left(10);
 
-        emit Logger("RfidDLL: Card read with number " + cleanedCardNumber);
+        emit Logger(CARD_READ.arg(cleanedCardNumber));
         emit CardRead(cleanedCardNumber);
+
+    } else {
+
     }
 }

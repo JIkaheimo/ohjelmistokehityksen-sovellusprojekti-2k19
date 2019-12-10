@@ -2,8 +2,6 @@
 #define RFIDDLL_H
 
 #include "rfiddll_global.h"
-#include <QDebug>
-#include <QTimer>
 #include <QtSerialPort/QSerialPort>
 
 class RFIDDLLSHARED_EXPORT RfidDLL : public QObject
@@ -11,20 +9,19 @@ class RFIDDLLSHARED_EXPORT RfidDLL : public QObject
     Q_OBJECT
 
 public:
-    explicit RfidDLL(const QString& portNumber, QObject *parent = nullptr);
-    ~RfidDLL();
-    bool readData();
+    bool RFIDDLLSHARED_EXPORT readData(const QString& port);
 
 signals:
-    void CardRead(QString data);
-    void Logger(QString logged);
+    void RFIDDLLSHARED_EXPORT CardRead(QString data);
+    void RFIDDLLSHARED_EXPORT ErrorHappened(QString message);
+    void RFIDDLLSHARED_EXPORT Logger(QString logged);
 
 private slots:
     void onReadyRead();
 
 private:
     QSerialPort *m_serialPort = nullptr;
-    void initSerialPort(const QString &port);
+    bool initSerialPort(const QString &port);
 };
 
 #endif // RFIDDLL_H

@@ -54,8 +54,6 @@ PinDialog::PinDialog(QWidget *parent) :
 PinDialog::~PinDialog()
 {
     delete ui;
-    ui = nullptr;
-    mTimer = nullptr;
 }
 
 
@@ -94,6 +92,7 @@ void PinDialog::onOkClicked()
   * Gets called when the user clicks the "OK" button.
   */
 {
+    mTimer->stop();
     emit Logger("Pin " + mPinCode + " entered.");
     emit PinEntered(mPinCode.toInt());
     close();

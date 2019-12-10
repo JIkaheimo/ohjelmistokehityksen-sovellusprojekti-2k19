@@ -21,6 +21,11 @@ MainView::MainView(QWidget *parent) :
         ui->btnToDeposit, &QPushButton::clicked,
         [this]{ emit ToDeposit(); }
     );
+
+    connect(
+        ui->btnToOverview, &QPushButton::clicked,
+        [this]{ emit ToOverview(); }
+    );
 }
 
 MainView::~MainView()

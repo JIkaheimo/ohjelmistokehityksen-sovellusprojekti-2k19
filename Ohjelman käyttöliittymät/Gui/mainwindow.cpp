@@ -9,13 +9,18 @@
 
 #include <QMessageBox>
 #include <QDebug>
+#include <ui_mainwindow.h>
+
+const QString PIN_TIMEOUT_MSG = "Please input your pin code within 10 seconds.";
 
 
 const QString PORT = "COM3";
 
 using namespace std::placeholders;
 
-MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
+MainWindow::MainWindow(QWidget *parent):
+    QMainWindow(parent),
+
     mDB(new DatabaseDLL(this)),
     mRFID(new RfidDLL(PORT, this)),
     mPin(new PinDLL()),
@@ -40,6 +45,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
         this, &MainWindow::pinEntered
     );
 
+    connect(
+        mPin, &PinDLL::Timeout,
+        [this](){ displayError(PIN_TIMEOUT_MSG); }
+    );
 
     connect(
         ui->btnBack, &QPushButton::clicked,
@@ -49,24 +58,22 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent),
     // Enable logging, disable for release
     connect(
         mPin, &PinDLL::Logger,
-        [](QString source, QString desc){
-            qDebug() << QString("%1 '%2'").arg(source).arg(desc);
-        }
+        this, &MainWindow::logger
     );
 
     connect(
         mDB, &DatabaseDLL::Logger,
-        [](QString logged){ qDebug() << logged << endl; }
+        [this](QString logged){ logger("DatabaseDLL", logged); }
     );
 
     connect(
         mDB, &DatabaseDLL::ErrorHappened,
-        [this](QString message){ QMessageBox::warning(this, "Database Error", message); }
+        this, &MainWindow::displayError
     );
 
     connect(
         mRFID, &RfidDLL::Logger,
-        [](QString logged){ qDebug() << logged << endl; }
+        [this](QString logged){ logger("RfidDLL", logged); }
     );
 
     initStartView();
@@ -150,7 +157,7 @@ void MainWindow::initWithdrawalView()
     // Listen for any withdrawal events.
     connect(
         withdrawalView, &WithdrawalView::Withdraw,
-        this, &MainWindow::withdraw
+        mDB, &DatabaseDLL::withdraw
     );
 
     // Update withdrawal controls based on the account balance.
@@ -173,7 +180,7 @@ void MainWindow::initDepositView()
     // Listen for any deposit events.
     connect(
         depositView, &DepositView::Deposit,
-        this, &MainWindow::deposit
+        mDB, &DatabaseDLL::deposit
     );
 }
 
@@ -190,7 +197,7 @@ void MainWindow::initEventView()
     // Listen for any login events.
     connect(
         mDB, &DatabaseDLL::UserAuthenticated,
-        [this, eventView](){ eventView->setEvents(mDB->getEvents()); }
+        [this, eventView]{ eventView->setEvents(mDB->getEvents()); }
     );
 }
 
@@ -198,25 +205,38 @@ void MainWindow::initEventView()
 void MainWindow::setCurrentPage(QWidget& page)
 {
     // Save the previous page to page history.
-
     QWidget* currentPage = ui->pageStack->currentWidget();
     mPageHistory.push(currentPage);
+
+    showPage(page);
+}
+
+void MainWindow::showPage(QWidget& page)
+{
+    bool isStartPage = &page == ui->pageStart;
+    bool isMainPage = &page == ui->pageMain;
+
+    QPushButton* btn = ui->btnBack;
+    QLabel* label = ui->labelBalance;
+
     ui->pageStack->setCurrentWidget(&page);
 
-    ui->btnBack->show();
-
-    if (&page == ui->pageStart)
+    if (isStartPage)
     {
-        ui->btnBack->hide();
-        ui->labelBalance->setText("");
+        label->setText("");
+        btn->hide();
     }
-    else if (&page == ui->pageMain)
+    else if (isMainPage)
     {
-        ui->btnBack->setText("Logout");
+        showBalance(mDB->getBalance());
+        btn->show();
+        btn->setText("Logout");
     }
     else
     {
-        ui->btnBack->setText("Back");
+        showBalance(mDB->getBalance());
+        btn->show();
+        btn->setText("Back");
     }
 }
 
@@ -225,14 +245,17 @@ void MainWindow::previousPage()
     if (!mPageHistory.isEmpty())
     {
         QWidget* previousPage = mPageHistory.pop();
-        ui->pageStack->setCurrentWidget(previousPage);
+        showPage(*previousPage);
     }
 }
 
 
 void MainWindow::readCard()
 {
-   mRFID->readData();
+   if (~mRFID->readData())
+   {
+       displayError("Could not connect to RFID reader.");
+   }
 }
 
 void MainWindow::test()
@@ -263,34 +286,21 @@ void MainWindow::pinEntered(int pinCode)
 
 void MainWindow::showBalance(float balance)
 {
-    ui->labelBalance->show();
-
     QString balanceString;
     balanceString.sprintf("Account balance: %.2f€", static_cast<double>(balance));
 
     ui->labelBalance->setText(balanceString);
 }
 
-void MainWindow::withdraw(float amount)
+
+void MainWindow::logger(QString source, QString description)
 {
-    if (!mDB->withdraw(amount))
-    {
-        QMessageBox::information(this,
-            "Account balance insufficient",
-            "Could not complete the transaction, because account balance is insufficient."
-        );
-    }
+    qDebug() << QString("LOGGING - src: %1, desc: %2").arg(source).arg(description);
 }
 
-void MainWindow::deposit(float depositAmount)
+void MainWindow::displayError(QString message)
 {
-    if (!mDB->deposit(depositAmount))
-    {
-        QMessageBox::information(this, "Failed to deposit",
-            "Failed to deposit funds..."
-        );
-    }
+    QMessageBox::warning(this, "", message);
 }
-
 
 

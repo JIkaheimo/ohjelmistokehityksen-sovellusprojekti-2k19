@@ -16,7 +16,6 @@ SOURCES += \
     main.cpp \
     mainview.cpp \
     mainwindow.cpp \
-    pindialog.cpp \
     startview.cpp \
     withdrawalview.cpp
 
@@ -26,7 +25,6 @@ HEADERS += \
     eventview.h \
     mainview.h \
     mainwindow.h \
-    pindialog.h \
     startview.h \
     withdrawalview.h
 
@@ -35,7 +33,6 @@ FORMS += \
     eventview.ui \
     mainview.ui \
     mainwindow.ui \
-    pindialog.ui \
     startview.ui \
     withdrawalview.ui
 

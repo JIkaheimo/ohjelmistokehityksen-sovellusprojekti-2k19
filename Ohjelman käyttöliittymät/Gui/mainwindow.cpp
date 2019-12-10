@@ -22,13 +22,14 @@ MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
 
     mDB(new DatabaseDLL(this)),
-    mRFID(new RfidDLL(PORT, this)),
+    mRFID(new RfidDLL()),
     mPin(new PinDLL()),
     mPageHistory(),
 
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
 
     connect(
         mRFID, &RfidDLL::CardRead,
@@ -76,6 +77,13 @@ MainWindow::MainWindow(QWidget *parent):
         [this](QString logged){ logger("RfidDLL", logged); }
     );
 
+    connect(
+        mRFID, &RfidDLL::ErrorHappened,
+        this, &MainWindow::displayError
+    );
+
+    mRFID->readData(PORT);
+
     initStartView();
     initMainView();
     initWithdrawalView();
@@ -86,8 +94,12 @@ MainWindow::MainWindow(QWidget *parent):
 
 MainWindow::~MainWindow()
 {
-    delete mPin;
     delete ui;
+
+    delete mRFID;
+    mRFID = nullptr;
+
+    delete mPin;
     mPin = nullptr;
 }
 
@@ -252,10 +264,7 @@ void MainWindow::previousPage()
 
 void MainWindow::readCard()
 {
-   if (~mRFID->readData())
-   {
-       displayError("Could not connect to RFID reader.");
-   }
+   mRFID->readData(PORT);
 }
 
 void MainWindow::test()

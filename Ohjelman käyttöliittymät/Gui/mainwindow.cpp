@@ -21,7 +21,7 @@ using namespace std::placeholders;
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
 
-    mDB(new DatabaseDLL(this)),
+    mDB(new DatabaseDLL()),
     mRFID(new RfidDLL()),
     mPin(new PinDLL()),
     mPageHistory(),
@@ -29,12 +29,6 @@ MainWindow::MainWindow(QWidget *parent):
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-
-    connect(
-        mRFID, &RfidDLL::CardRead,
-        this, &MainWindow::cardRead
-    );
 
     connect(
         mDB, &DatabaseDLL::BalanceChanged,
@@ -72,24 +66,16 @@ MainWindow::MainWindow(QWidget *parent):
         this, &MainWindow::displayError
     );
 
-    connect(
-        mRFID, &RfidDLL::Logger,
-        [this](QString logged){ logger("RfidDLL", logged); }
-    );
-
-    connect(
-        mRFID, &RfidDLL::ErrorHappened,
-        this, &MainWindow::displayError
-    );
-
-    mRFID->readData(PORT);
-
     initStartView();
     initMainView();
     initWithdrawalView();
     initDepositView();
     initEventView();
     setCurrentPage(*ui->pageStart);
+
+    show();
+
+    initRfid();
 }
 
 MainWindow::~MainWindow()
@@ -101,8 +87,32 @@ MainWindow::~MainWindow()
 
     delete mPin;
     mPin = nullptr;
+
+    delete mDB;
+    mDB = nullptr;
 }
 
+
+void MainWindow::initRfid()
+{
+    connect(
+        mRFID, &RfidDLL::Logger,
+        [this](QString logged){ logger("RfidDLL", logged); }
+    );
+
+    connect(
+        mRFID, &RfidDLL::ErrorHappened,
+        this, &MainWindow::displayError
+    );
+
+    if (mRFID->readData(PORT))
+    {
+        connect(
+            mRFID, &RfidDLL::CardRead,
+            this, &MainWindow::cardRead
+        );
+    }
+}
 
 
 /** VIEW INITIALIZATIONS */

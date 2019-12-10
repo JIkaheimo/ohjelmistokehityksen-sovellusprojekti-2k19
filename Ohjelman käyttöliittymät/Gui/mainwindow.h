@@ -3,9 +3,9 @@
 
 #include <QMainWindow>
 
-#include <databasedll.h>
-#include <rfiddll.h>
-#include <pindll.h>
+#include "databasedll.h"
+#include "rfiddll.h"
+#include "pindll.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -48,6 +48,8 @@ private:
 
     void showBalance(float balance);
 
+    void initRfid();
+
     // View initializators
     void initWithdrawalView();
     void initDepositView();
@@ -56,5 +58,6 @@ private:
     void initStartView();
 
     void showPage(QWidget &page);
+
 };
 #endif // MAINWINDOW_H

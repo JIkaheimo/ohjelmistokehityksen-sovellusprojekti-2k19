@@ -23,7 +23,7 @@ private:
 
 public:
 
-    explicit DatabaseDLL(QObject *parent = nullptr);
+    explicit DatabaseDLL();
     ~DatabaseDLL();
 
     bool login(QString cardNumber, int pin);

@@ -9,6 +9,9 @@ class RFIDDLLSHARED_EXPORT RfidDLL : public QObject
     Q_OBJECT
 
 public:
+    explicit RfidDLL();
+    ~RfidDLL();
+
     bool RFIDDLLSHARED_EXPORT readData(const QString& port);
 
 signals:

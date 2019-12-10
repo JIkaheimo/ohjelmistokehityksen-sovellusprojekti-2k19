@@ -6,14 +6,24 @@ const QString PORT_FAIL = "Could not open a connection in port %1.";
 
 const QString CARD_READ = "Card read with number %1.";
 
+
+RfidDLL::RfidDLL() :
+    m_serialPort(new QSerialPort())
+{
+}
+
+RfidDLL::~RfidDLL()
+{
+    delete m_serialPort;
+    m_serialPort = nullptr;
+}
+
 bool RfidDLL::initSerialPort(const QString& port)
 /**
  * Initializes serial port for reading data.
  */
 {
     emit Logger(PORT_INITIALIZING.arg(port));
-
-    m_serialPort = new QSerialPort(this);
     m_serialPort->setPortName(port);
     m_serialPort->setBaudRate(QSerialPort::Baud9600);
     m_serialPort->setDataBits(QSerialPort::Data8);

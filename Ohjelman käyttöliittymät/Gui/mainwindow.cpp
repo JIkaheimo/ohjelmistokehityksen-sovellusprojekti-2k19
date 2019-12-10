@@ -82,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent):
         this, &MainWindow::displayError
     );
 
-    mRFID->readData(PORT);
+    //mRFID->readData(PORT);
 
     initStartView();
     initMainView();
@@ -90,6 +90,7 @@ MainWindow::MainWindow(QWidget *parent):
     initDepositView();
     initEventView();
     setCurrentPage(*ui->pageStart);
+    mRFID->readData(PORT);
 }
 
 MainWindow::~MainWindow()

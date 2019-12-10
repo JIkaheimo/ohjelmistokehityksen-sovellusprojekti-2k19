@@ -1,11 +1,11 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "databasedll.h"
-
 #include <QMainWindow>
-#include <pindll.h>
+
+#include <databasedll.h>
 #include <rfiddll.h>
+#include <pindll.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -16,6 +16,7 @@ class MainWindow : public QMainWindow
 {
 
     Q_OBJECT
+
 private:
     DatabaseDLL* mDB;
     RfidDLL* mRFID;
@@ -29,10 +30,7 @@ public:
     ~MainWindow();
 
 private slots:
-
     void pinEntered(int pinCode);
-    void withdraw(float amount);
-    void deposit(float amount);
 
     void previousPage();
 
@@ -41,6 +39,9 @@ private slots:
     void test();
 
     void setCurrentPage(QWidget& page);
+
+    void logger(QString source, QString description);
+    void displayError(QString message);
 
 private:
     Ui::MainWindow *ui;
@@ -53,5 +54,7 @@ private:
     void initEventView();
     void initMainView();
     void initStartView();
+
+    void showPage(QWidget &page);
 };
 #endif // MAINWINDOW_H

@@ -16,21 +16,28 @@
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QPushButton" name="btnToWithdraw">
-       <property name="text">
-        <string>Withdraw</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
+     <item row="1" column="1">
       <widget class="QPushButton" name="btnToDeposit">
        <property name="text">
         <string>Deposit</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
+     <item row="1" column="0">
+      <widget class="QPushButton" name="btnToWithdraw">
+       <property name="text">
+        <string>Withdraw</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QPushButton" name="btnToOverview">
+       <property name="text">
+        <string>Overview</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
       <widget class="QPushButton" name="btnToEvents">
        <property name="text">
         <string>Events</string>

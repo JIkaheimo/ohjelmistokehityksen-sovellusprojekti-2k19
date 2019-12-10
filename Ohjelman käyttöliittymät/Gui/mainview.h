@@ -19,6 +19,7 @@ signals:
     void ToWithdrawal();
     void ToEvents();
     void ToDeposit();
+    void ToOverview();
 
 private:
     Ui::MainView *ui;

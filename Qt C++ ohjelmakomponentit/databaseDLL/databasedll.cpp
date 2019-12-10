@@ -28,6 +28,7 @@ const QString EVENT_TIME = "time";
 const QString EVENT_AMOUNT = "amount";
 const QString EVENT_ACCOUNT = "idAccount";
 
+const QString DEPOSIT_ERROR = "Could not deposit funds to account.";
 
 
 DatabaseDLL::DatabaseDLL(QObject *parent)
@@ -79,11 +80,12 @@ bool DatabaseDLL::login(QString cardNumber, int pin)
         QString accountID = cardModel.record(0).value(CARD_ACCOUNT).toString();
 
         mEvents->setFilter("idAccount = " + accountID);
+        mEvents->sort(4, Qt::DescendingOrder);
         mAccount->setFilter("id = " + accountID);
         mEvents->select();
         mAccount->select();
 
-        emit Logger("DatabaseDLL: Login successful for account (ID): " + accountID);
+        emit Logger("Login successful for account (ID): " + accountID);
         emit BalanceChanged(getBalance());
         emit UserAuthenticated();
 
@@ -91,14 +93,22 @@ bool DatabaseDLL::login(QString cardNumber, int pin)
     }
     else
     {
-        emit ErrorHappened("DatabaseDLL:login 'Login failed'");
+        emit ErrorHappened("Login failed. Please give correct login credentials.");
         return false;
     }
 }
 
 float DatabaseDLL::getBalance()
+/**
+  * Returns the selected account's balance.
+  */
 {
-    if (!mAccount->select());
+    if (!mAccount->select())
+        emit Logger("Error fetching account's balance from the database.");
+
+    if (mAccount->rowCount() != 1)
+        emit Logger("There were incorrect amount of accounts selected while getting balance...");
+
     return mAccount->record(0).value(ACCOUNT_BALANCE).toFloat();
 }
 
@@ -107,18 +117,25 @@ bool DatabaseDLL::deposit(float depositAmount)
     if (addToBalance(depositAmount))
     {
         addEvent(EVENT::DEPOSIT, depositAmount);
+        emit BalanceChanged(getBalance());
         return true;
     }
+
+    emit ErrorHappened(DEPOSIT_ERROR);
     return false;
 }
 
 
-bool DatabaseDLL::withdraw(float withdrawAmount) {
+bool DatabaseDLL::withdraw(float withdrawAmount)
+{
     if (addToBalance(-withdrawAmount))
     {
         addEvent(EVENT::WITHDARWAL, withdrawAmount);
+        emit BalanceChanged(getBalance());
         return true;
     }
+
+    emit ErrorHappened("Could not withdraw funds from account.");
     return false;
 }
 
@@ -158,10 +175,10 @@ QSqlTableModel* DatabaseDLL::getEvents()
   */
 {
     if (!mEvents->select())
-        emit ErrorHappened("DatabaseDLL:getEvents 'Error getting events.'");
+        emit Logger("Error fetching events from the database.");
 
     if (!mEvents->rowCount())
-        emit Logger("DatabaseDLL:getEvents 'No events available.'");
+        emit Logger("No events available for account");
 
     return mEvents;
 }
@@ -169,11 +186,7 @@ QSqlTableModel* DatabaseDLL::getEvents()
 
 bool DatabaseDLL::addToBalance(float amount)
 {
-
-    QVariant baseBalance = mAccount->record(0).value(ACCOUNT_BALANCE);
-    float newBalance = baseBalance.toFloat() + amount;
-
-    emit Logger("Balance: " + baseBalance.toString());
+    float newBalance = getBalance() + amount;
 
     // Make sure the balance cannot be negative.
     if (newBalance < 0)
@@ -183,20 +196,8 @@ bool DatabaseDLL::addToBalance(float amount)
 
     // Update the record
     QSqlRecord record = mAccount->record(0);
-    record.setValue(ACCOUNT_BALANCE, record.value(ACCOUNT_BALANCE).toFloat() + amount);
+    record.setValue(ACCOUNT_BALANCE, newBalance);
     mAccount->setRecord(0, record);
 
-    if (mAccount->submit())
-    {
-        mAccount->select();
-        emit Logger("DatabaseDLL: Balance succesfully updated");
-        emit BalanceChanged(newBalance);
-    }
-    else
-    {
-        emit ErrorHappened("DatabaseDLL:addToBalance 'Error updating account balance.'");
-        return false;
-    }
-
-    return true;
+    return mAccount->submit();
 }

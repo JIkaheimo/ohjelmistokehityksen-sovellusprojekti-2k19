@@ -8,9 +8,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 LIBS += $$PWD\..\..\build\rfidDLL.dll
 LIBS += $$PWD\..\..\build\pinDLL.dll
+LIBS += $$PWD\..\..\build\databaseDLL.dll
 
 SOURCES += \
-    databasedll.cpp \
     depositview.cpp \
     eventview.cpp \
     main.cpp \
@@ -20,7 +20,6 @@ SOURCES += \
     withdrawalview.cpp
 
 HEADERS += \
-    databasedll.h \
     depositview.h \
     eventview.h \
     mainview.h \

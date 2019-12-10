@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
-    <height>768</height>
+    <width>540</width>
+    <height>420</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -21,39 +21,49 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>1024</width>
-    <height>768</height>
+    <width>540</width>
+    <height>420</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>1024</width>
-    <height>768</height>
+    <width>540</width>
+    <height>420</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>BankSimul</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QLabel {
-	font-size: 15px;
+   <string notr="true">QPushButton {
+	padding:  10px;
+	font-size: 14px;
+	font-weight: bold;
 }
 
-QLabel#labelHeader {
-	font-size: 40px;
-	color: rgb(255, 170, 0);
+QPushButton#btnBack {
+	color: rgb(255, 255, 255);
+	background-color: #d9534f;
 }
 
-QLabel#labelBalance {
+QPushButton#btnAction {
+	background-color: #5cb85c;;
+	color: rgb(255, 255, 255);
+}
+
+QDoubleSpinBox, QLineEdit {
+	font-size: 20px;
+}
+
+QLabel#labelInfo {
 	font-size: 14px;
 }
 
-QPushButton {
-	padding: 10px;
-	font-size: 15px;
-}
-
-</string>
+QTableView {
+	background-color: #fffff;
+	color: #000000;
+	font-size: 10px;
+}</string>
   </property>
   <widget class="QWidget" name="baseLayout">
    <layout class="QGridLayout" name="gridLayout_7">
@@ -83,6 +93,11 @@ QPushButton {
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
           </property>
           <property name="text">
            <string>Balance is shown here</string>
@@ -116,7 +131,7 @@ QPushButton {
           <property name="font">
            <font>
             <family>Algerian</family>
-            <pointsize>-1</pointsize>
+            <pointsize>32</pointsize>
            </font>
           </property>
           <property name="text">

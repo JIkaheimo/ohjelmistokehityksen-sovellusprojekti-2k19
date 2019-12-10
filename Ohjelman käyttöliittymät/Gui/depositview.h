@@ -18,8 +18,12 @@ public:
 signals:
     void Deposit(float amount);
 
+private slots:
+    void onDeposit();
+
 private:
     Ui::DepositView *ui;
+    double getDeposit();
 };
 
 #endif // DEPOSITVIEW_H

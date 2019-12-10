@@ -1,11 +1,13 @@
 #ifndef DATABASEDLL_H
 #define DATABASEDLL_H
 
+#include "databaseDLL_global.h"
+
 #include <QObject>
 #include <QtSql>
 #include <QSqlDatabase>
 
-class DatabaseDLL : public QObject
+class DATABASEDLL_EXPORT DatabaseDLL  : public QObject
 {
     Q_OBJECT
 

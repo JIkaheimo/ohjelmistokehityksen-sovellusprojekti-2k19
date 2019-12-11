@@ -26,7 +26,7 @@
    <item row="0" column="0" colspan="2">
     <widget class="QLabel" name="labelInfo">
      <property name="text">
-      <string>Select the amount of withdrawal</string>
+      <string>Select amount of withdrawal:</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

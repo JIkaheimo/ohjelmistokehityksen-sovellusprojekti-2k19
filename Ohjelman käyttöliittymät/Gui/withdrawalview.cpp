@@ -2,6 +2,11 @@
 #include "ui_withdrawalview.h"
 
 #include <QInputDialog>
+#include <QMessageBox>
+
+#include <QDebug>
+const QString WITHDRAWAL_QUESTION = "Do you want to withdraw %1€?";
+
 
 WithdrawalView::WithdrawalView(QWidget *parent) :
     QWidget(parent),
@@ -21,18 +26,23 @@ WithdrawalView::WithdrawalView(QWidget *parent) :
     );
 }
 
+
 WithdrawalView::~WithdrawalView()
 {
     delete ui;
 }
 
-void WithdrawalView::connectWithdraw(QPushButton* button, float amount)
+
+void WithdrawalView::connectWithdraw(QPushButton* button, double amount)
 {
     connect(
         button, &QPushButton::clicked,
-        [this, amount](){ emit Withdraw(amount); }
+        [this, amount](){
+            confirmAndWithdraw(amount);
+        }
     );
 }
+
 
 void WithdrawalView::setWithdrawable(float amount)
 {
@@ -44,10 +54,26 @@ void WithdrawalView::setWithdrawable(float amount)
     ui->btnWithdraw500->setEnabled(amount >= 500);
 }
 
+
 void WithdrawalView::onXWithdrawal()
 {
-    double withdrawalAmount = QInputDialog::getDouble(this,
-        "Select the amount to withdraw", "Withdrawal amount:");
+    bool ok;
 
-    emit Withdraw(static_cast<float>(withdrawalAmount));
+    double withdrawalAmount = QInputDialog::getInt(this,
+        "Select the amount to withdraw", "Withdrawal amount:", 20, 20, 10000, 20, &ok);
+
+    if (ok)
+        confirmAndWithdraw(withdrawalAmount);
+}
+
+
+void WithdrawalView::confirmAndWithdraw(double amount)
+{
+    auto reply = QMessageBox::question(
+        this, "Confirm withdrawal",
+        WITHDRAWAL_QUESTION.arg(amount)
+    );
+
+    if (reply == QMessageBox::Yes)
+        emit Withdraw(static_cast<float>(amount));
 }

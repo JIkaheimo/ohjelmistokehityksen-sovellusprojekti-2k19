@@ -27,7 +27,9 @@ private slots:
 
 private:
     Ui::WithdrawalView *ui;
-    void connectWithdraw(QPushButton *button, float amount);
+
+    void connectWithdraw(QPushButton *button, double amount);
+    void confirmAndWithdraw(double amount);
 };
 
 #endif // WITHDRAWALVIEW_H

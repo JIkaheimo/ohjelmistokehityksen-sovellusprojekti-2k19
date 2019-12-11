@@ -37,8 +37,6 @@ bool RfidDLL::initSerialPort(const QString& port)
 
 bool RfidDLL::readData(const QString& port)
 {
-
-
     if (m_serialPort->isOpen() || initSerialPort(port))
     {
         connect(

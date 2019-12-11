@@ -7,40 +7,47 @@
 #include <QtSql>
 #include <QSqlDatabase>
 
+class Card;
+class Account;
+
+#include "event.h"
+
 class DATABASEDLL_EXPORT DatabaseDLL  : public QObject
 {
     Q_OBJECT
 
 private:
     QSqlDatabase mDB;
-    QSqlTableModel* mAccount;
-    QSqlTableModel* mEvents;
 
-    enum EVENT {
-        WITHDARWAL,
-        DEPOSIT
-    };
+    int mAccountId;
+
+    Account* mAccount;
+    Card* mCard;
+    Event* mEvent;
 
 public:
 
     explicit DatabaseDLL();
     ~DatabaseDLL();
 
-    bool login(QString cardNumber, int pin);
-    bool deposit(float depositAmount);
-    bool withdraw(float withdrawAmount);
+    bool DATABASEDLL_EXPORT login(QString cardNumber, int pin);
 
-    QSqlTableModel* getEvents();
-    float getBalance();
+    float DATABASEDLL_EXPORT getBalance();
+    bool DATABASEDLL_EXPORT deposit(float depositAmount);
+    bool DATABASEDLL_EXPORT withdraw(float withdrawAmount);
+
+    QAbstractItemModel* DATABASEDLL_EXPORT getEvents();
+    QAbstractItemModel* DATABASEDLL_EXPORT getRecentEvents(int amount);
 
 signals:
-    void BalanceChanged(float newBalance);
-    void UserAuthenticated();
-    void ErrorHappened(QString description);
-    void Logger(QString message);
+    void DATABASEDLL_EXPORT BalanceChanged(float newBalance);
+    void DATABASEDLL_EXPORT ErrorHappened(QString description);
+    void DATABASEDLL_EXPORT Logger(QString message);
 
 private:
-    void addEvent(DatabaseDLL::EVENT type, float amount);
+
+
+    void addEvent(Event::Type type, float amount);
     bool addToBalance(float amount);
 };
 

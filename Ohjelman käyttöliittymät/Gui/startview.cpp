@@ -8,7 +8,7 @@ StartView::StartView(QWidget *parent) :
     ui->setupUi(this);
 
     connect(
-        ui->btnReadRfid, &QPushButton::clicked,
+        ui->btnAction, &QPushButton::clicked,
         [this]{ emit ReadCard(); }
     );
 

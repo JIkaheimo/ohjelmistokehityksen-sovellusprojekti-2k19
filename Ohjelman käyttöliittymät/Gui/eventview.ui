@@ -29,7 +29,7 @@
    <item row="0" column="0">
     <layout class="QVBoxLayout" name="mainLayout">
      <item>
-      <widget class="QLabel" name="labelH2">
+      <widget class="QLabel" name="labelInfo">
        <property name="text">
         <string>Events</string>
        </property>

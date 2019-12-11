@@ -16,4 +16,7 @@ EventView::~EventView()
 void EventView::setEvents(QAbstractItemModel* eventModel)
 {
     ui->tableEvents->setModel(eventModel);
+    ui->tableEvents->hideColumn(0);
+    ui->tableEvents->hideColumn(2);
+    ui->tableEvents->sortByColumn(0, Qt::DescendingOrder);
 }

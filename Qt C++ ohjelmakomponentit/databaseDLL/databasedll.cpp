@@ -1,8 +1,9 @@
 #include "card.h"
 #include "account.h"
+#include "customer.h"
+#include "event.h"
 
 #include "databasedll.h"
-#include "event.h"
 
 #include <QSqlQuery>
 
@@ -29,6 +30,7 @@ DatabaseDLL::DatabaseDLL()
         mAccount = new Account(mDB);
         mCard = new Card(mDB);
         mEvent = new Event(mDB);
+        mCustomer = new Customer(mDB);
     }
     else
     {
@@ -84,6 +86,17 @@ float DatabaseDLL::getBalance()
   */
 {
     return mAccount->getBalance(mAccountId);
+}
+
+QString DatabaseDLL::getAccountOwner()
+{
+    int customerId = mAccount->getCustomerId(mAccountId);
+    return mCustomer->getName(customerId);
+}
+
+QString DatabaseDLL::getAccountNumber()
+{
+    return mAccount->getNumber(mAccountId);
 }
 
 bool DatabaseDLL::deposit(float depositAmount)

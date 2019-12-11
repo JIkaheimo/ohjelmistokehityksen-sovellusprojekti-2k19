@@ -15,5 +15,15 @@ SummaryView::~SummaryView()
 
 void SummaryView::setEvents(QAbstractItemModel *events)
 {
-    ui->listRecentEvents->setModel(events);
+    ui->eventTable->setModel(events);
+}
+
+void SummaryView::setAccountNumber(QString accNumber)
+{
+    ui->numberText->setText(accNumber);
+}
+
+void SummaryView::setOwner(QString owner)
+{
+    ui->ownerText->setText(owner);
 }

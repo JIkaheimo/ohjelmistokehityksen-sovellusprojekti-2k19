@@ -50,6 +50,10 @@ DatabaseDLL::~DatabaseDLL()
 
     delete mCard;
     mCard = nullptr;
+
+    delete mCustomer;
+    mCustomer = nullptr;
+
 }
 
 
@@ -98,6 +102,7 @@ QString DatabaseDLL::getAccountNumber()
 {
     return mAccount->getNumber(mAccountId);
 }
+
 
 bool DatabaseDLL::deposit(float depositAmount)
 {

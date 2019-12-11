@@ -16,13 +16,21 @@
 #include <QDebug>
 #include <ui_mainwindow.h>
 
-const QString WITHDRAWAL_MSG = "Succesfully withdrawed money from the account. Remember to take the bills from the dispenser.";
+const QString RFID_SRC = "RfidDLL";
+const QString DB_SRC = "DatabaseDLL";
+
+const QString WITHDRAWAL_MSG = "Succesfully withdrew money from the account. Remember to take the bills from the dispenser.";
 const QString WITHDRAWAL_ERROR = "Account doesn't have enough funds for the withdrawal.";
+
+const QString DEPOSIT_MSG = "Money was succesfully added to the account.";
+const QString DEPOSIT_ERROR = "Could not add money to the account, please take it from the dispenser";
 
 const QString PIN_TIMEOUT_MSG = "Please input your pin code within 10 seconds.";
 
-const QString PORT = "COM3";
+const QString LOGOUT_MSG = "Thank you for using BankSimul. See you again!";
 
+const QString CARD_NUMBER = "0A0079C7BF";
+const QString PORT = "COM3";
 
 
 MainWindow::MainWindow(QWidget *parent):
@@ -51,8 +59,8 @@ MainWindow::MainWindow(QWidget *parent):
     initEventView();
     mSummaryView = new SummaryView(this);
     ui->layoutSummary->addWidget(mSummaryView);
-    ui->pageStack->setCurrentWidget(ui->pageStart);
 
+    showPage(ui->pageStart);
     show();
 
     // Library initialization
@@ -65,6 +73,7 @@ MainWindow::~MainWindow()
 {
     delete ui;
 
+    // Make sure libs are correctly removed
     delete mRFID;
     mRFID = nullptr;
 
@@ -73,6 +82,14 @@ MainWindow::~MainWindow()
 
     delete mDB;
     mDB = nullptr;
+
+    delete mMainView;
+    delete mStartView;
+    delete mWithdrawalView;
+    delete mDepositView;
+    delete mEventView;
+    delete mSummaryView;
+    delete mPageHistory;
 }
 
 
@@ -81,7 +98,7 @@ void MainWindow::initDB()
     connect(
         mDB, &DatabaseDLL::Logger,
         [this](QString logged){
-            logger("DatabaseDLL", logged);
+            logger(DB_SRC, logged);
         }
     );
 
@@ -121,7 +138,7 @@ void MainWindow::initRfid()
 {
     connect(
         mRFID, &RfidDLL::Logger,
-        [this](QString logged){ logger("RfidDLL", logged); }
+        [this](QString logged){ logger(RFID_SRC, logged); }
     );
 
     connect(
@@ -155,12 +172,7 @@ void MainWindow::initMainView()
 
     connect(
         mMainView, &MainView::ToOverview,
-        [this]{
-            mSummaryView->setOwner(mDB->getAccountOwner());
-            mSummaryView->setAccountNumber(mDB->getAccountNumber());
-            mSummaryView->setEvents(mDB->getRecentEvents(5));
-            setCurrentPage(ui->pageSummary);
-         }
+        this, &MainWindow::toSummaryView
     );
 
     connect(
@@ -205,7 +217,7 @@ void MainWindow::initStartView()
     connect(
         mStartView, &StartView::TestLogin,
         [this]{
-            cardRead("0A0079C7BF");
+            cardRead(CARD_NUMBER);
         }
     );
 
@@ -247,7 +259,7 @@ void MainWindow::initDepositView()
     // Listen for any deposit events.
     connect(
         mDepositView, &DepositView::Deposit,
-        mDB, &DatabaseDLL::deposit
+        this, &MainWindow::onDeposit
     );
 }
 
@@ -306,8 +318,17 @@ void MainWindow::previousPage()
 
     if (mPageHistory->isEmpty())
         // TODO: "Logout" from the database interface.
-        displayInfo("Thank you for using BankSimul. See you again!");
+        displayInfo(LOGOUT_MSG);
 
+}
+
+
+void MainWindow::onDeposit(float amount)
+{
+    if (mDB->deposit(amount))
+        displayInfo(DEPOSIT_MSG);
+    else
+        displayError(DEPOSIT_ERROR);
 }
 
 
@@ -319,6 +340,7 @@ void MainWindow::onWithdrawal(float amount)
         displayError(WITHDRAWAL_ERROR);
 }
 
+
 void MainWindow::readCard()
 {
    mRFID->readData(PORT);
@@ -329,6 +351,14 @@ void MainWindow::cardRead(QString cardNumber)
 {
     mCardNumber = cardNumber;
     mPin->getPin(this);
+}
+
+void MainWindow::toSummaryView()
+{
+    mSummaryView->setOwner(mDB->getAccountOwner());
+    mSummaryView->setAccountNumber(mDB->getAccountNumber());
+    mSummaryView->setEvents(mDB->getRecentEvents(5));
+    setCurrentPage(ui->pageSummary);
 }
 
 

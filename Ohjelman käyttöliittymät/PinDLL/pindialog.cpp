@@ -54,6 +54,9 @@ PinDialog::PinDialog(QWidget *parent) :
 PinDialog::~PinDialog()
 {
     delete ui;
+
+    delete mTimer;
+    mTimer = nullptr;
 }
 
 

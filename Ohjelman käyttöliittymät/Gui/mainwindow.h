@@ -18,7 +18,6 @@ class DatabaseDLL;
 class RfidDLL;
 class PinDLL;
 
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -42,21 +41,25 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+
 private slots:
     void pinEntered(int pinCode);
-
-    void previousPage();
-
     void cardRead(QString cardNumber);
     void readCard();
 
     void setCurrentPage(QWidget* page);
+    void previousPage();
 
+    // Logging and dialogs
     void logger(QString source, QString description);
     void displayError(QString message);
     void displayInfo(QString message);
 
     void onWithdrawal(float amount);
+    void onDeposit(float amount);
+
+    void toSummaryView();
+
 private:
     Ui::MainWindow *ui;
 

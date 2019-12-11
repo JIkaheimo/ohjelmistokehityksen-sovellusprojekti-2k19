@@ -12,6 +12,7 @@ class Table : public QObject
 {
 public:
     Table(const QSqlDatabase& db, const QString& name);
+    ~Table();
 
 protected:
     QSqlTableModel* mModel;

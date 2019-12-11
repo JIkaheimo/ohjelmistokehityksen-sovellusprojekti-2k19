@@ -35,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent):
 
     ui(new Ui::MainWindow)
 {
+
+    // GUI initialization
     ui->setupUi(this);
 
     connect(
@@ -49,15 +51,14 @@ MainWindow::MainWindow(QWidget *parent):
     initEventView();
     mSummaryView = new SummaryView(this);
     ui->layoutSummary->addWidget(mSummaryView);
-
-    setCurrentPage(ui->pageStart);
+    ui->pageStack->setCurrentWidget(ui->pageStart);
 
     show();
 
+    // Library initialization
     initRfid();
     initDB();
     initPin();
-
 }
 
 MainWindow::~MainWindow()
@@ -155,6 +156,8 @@ void MainWindow::initMainView()
     connect(
         mMainView, &MainView::ToOverview,
         [this]{
+            mSummaryView->setOwner(mDB->getAccountOwner());
+            mSummaryView->setAccountNumber(mDB->getAccountNumber());
             mSummaryView->setEvents(mDB->getRecentEvents(5));
             setCurrentPage(ui->pageSummary);
          }
@@ -289,15 +292,22 @@ void MainWindow::showPage(QWidget* page)
 
     ui->btnBack->setText(btnText);
     ui->btnBack->setVisible(showBackButton);
+    ui->labelHeader->setVisible(isStartPage);
 }
 
+
 void MainWindow::previousPage()
-{
+{    
     if (!mPageHistory->isEmpty())
     {
         QWidget* previousPage = mPageHistory->pop();
         showPage(previousPage);
     }
+
+    if (mPageHistory->isEmpty())
+        // TODO: "Logout" from the database interface.
+        displayInfo("Thank you for using BankSimul. See you again!");
+
 }
 
 
@@ -333,7 +343,7 @@ void MainWindow::pinEntered(int pinCode)
 void MainWindow::showBalance(float balance)
 {
     QString balanceString;
-    balanceString.sprintf("Account balance: %.2f€", static_cast<double>(balance));
+    balanceString.sprintf("BAL: %9.2f€", static_cast<double>(balance));
 
     ui->labelBalance->setText(balanceString);
 }

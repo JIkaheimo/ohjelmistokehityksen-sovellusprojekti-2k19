@@ -12,6 +12,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     account.cpp \
     card.cpp \
+    customer.cpp \
     databasedll.cpp \
     event.cpp \
     table.cpp
@@ -19,6 +20,7 @@ SOURCES += \
 HEADERS += \
     account.h \
     card.h \
+    customer.h \
     databaseDLL_global.h \
     databasedll.h \
     event.h \

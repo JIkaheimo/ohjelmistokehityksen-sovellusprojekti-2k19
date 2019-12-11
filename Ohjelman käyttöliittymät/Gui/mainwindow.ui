@@ -38,17 +38,18 @@
    <string notr="true">QPushButton {
 	padding:  10px;
 	font-size: 14px;
-	font-weight: bold;
 }
 
 QPushButton#btnBack {
 	color: rgb(255, 255, 255);
 	background-color: #d9534f;
+font-weight: bold;
 }
 
 QPushButton#btnAction {
 	background-color: #5cb85c;;
 	color: rgb(255, 255, 255);
+font-weight: bold;
 }
 
 QDoubleSpinBox, QLineEdit, QSpinBox {
@@ -83,10 +84,45 @@ QTableView {
         <property name="horizontalSpacing">
          <number>0</number>
         </property>
+        <item row="0" column="2">
+         <widget class="QLabel" name="labelBalance">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <family>Times New Roman</family>
+            <pointsize>15</pointsize>
+            <weight>50</weight>
+            <italic>false</italic>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);
+font: 15pt &quot;Times New Roman&quot;;
+padding: 8px;
+</string>
+          </property>
+          <property name="text">
+           <string>BAL: 51.92€</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="0">
          <widget class="QPushButton" name="btnBack">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -103,46 +139,35 @@ QTableView {
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QLabel" name="labelBalance">
-          <property name="enabled">
-           <bool>true</bool>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
           </property>
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Balance is shown here</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0" colspan="2">
-         <widget class="QLabel" name="labelHeader">
-          <property name="font">
-           <font>
-            <family>Algerian</family>
-            <pointsize>32</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>BankSimul</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
+         </spacer>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelHeader">
+        <property name="font">
+         <font>
+          <family>Algerian</family>
+          <pointsize>32</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>BankSimul</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QStackedWidget" name="pageStack">

@@ -13,7 +13,7 @@ MainView::MainView(QWidget *parent) :
     );
 
     connect(
-        ui->btnToWithdraw, &QPushButton::clicked,
+        ui->btnAction, &QPushButton::clicked,
         [this]{ emit ToWithdrawal(); }
     );
 

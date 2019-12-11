@@ -11,6 +11,8 @@ const QString TIME = "time";
 const QString AMOUNT = "amount";
 const QString ACCOUNT_ID = "idAccount";
 
+const QString TYPES[] = {"withdraw", "deposit"};
+
 Event::Event(QSqlDatabase& db) :
     Table(db, TABLE)
 {
@@ -25,7 +27,7 @@ bool Event::addEvent(int accountId, Event::Type type, float amount)
     // Create and populate a new event record.
     QSqlRecord newEvent = mModel->record();
 
-    newEvent.setValue(TYPE, type);
+    newEvent.setValue(TYPE, TYPES[type]);
     newEvent.setValue(ACCOUNT_ID, accountId);
     newEvent.setValue(TIME, timestamp.toString("yyyy-MM-dd hh:mm:ss"));
     newEvent.setValue(AMOUNT, amount);

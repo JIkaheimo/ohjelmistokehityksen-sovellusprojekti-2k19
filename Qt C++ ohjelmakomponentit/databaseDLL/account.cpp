@@ -50,7 +50,11 @@ int Account::getCustomerId(int accountId)
 
 QSqlRecord Account::selectItem(int accountId)
 {
-    mModel->setFilter(QString("%1 = %2").arg(ID).arg(accountId));
+    if (mLastId != accountId)
+    {
+        mModel->setFilter(QString("%1 = %2").arg(ID).arg(accountId));
+        mLastId = accountId;
+    }
     mModel->select();
     return mModel->record(0);
 }

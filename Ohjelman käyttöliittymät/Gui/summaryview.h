@@ -17,6 +17,8 @@ public:
     ~SummaryView();
 
     void setEvents(QAbstractItemModel* events);
+    void setAccountNumber(QString accNumber);
+    void setOwner(QString owner);
 
 private:
     Ui::SummaryView *ui;

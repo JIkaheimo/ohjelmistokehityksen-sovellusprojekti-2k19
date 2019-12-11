@@ -15,9 +15,11 @@ public:
 
 protected:
     QSqlTableModel* mModel;
+    int mLastId = -1;
 
 private:
     virtual QSqlRecord selectItem(int id)=0;
+
 };
 
 #endif // TABLE_H

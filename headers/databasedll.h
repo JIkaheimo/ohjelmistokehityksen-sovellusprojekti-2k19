@@ -7,10 +7,12 @@
 #include <QtSql>
 #include <QSqlDatabase>
 
+#include "event.h"
+
 class Card;
 class Account;
+class Customer;
 
-#include "event.h"
 
 class DATABASEDLL_EXPORT DatabaseDLL  : public QObject
 {
@@ -21,6 +23,7 @@ private:
 
     int mAccountId;
 
+    Customer* mCustomer;
     Account* mAccount;
     Card* mCard;
     Event* mEvent;
@@ -33,6 +36,9 @@ public:
     bool DATABASEDLL_EXPORT login(QString cardNumber, int pin);
 
     float DATABASEDLL_EXPORT getBalance();
+    QString DATABASEDLL_EXPORT getAccountOwner();
+    QString DATABASEDLL_EXPORT getAccountNumber();
+
     bool DATABASEDLL_EXPORT deposit(float depositAmount);
     bool DATABASEDLL_EXPORT withdraw(float withdrawAmount);
 
@@ -45,7 +51,6 @@ signals:
     void DATABASEDLL_EXPORT Logger(QString message);
 
 private:
-
 
     void addEvent(Event::Type type, float amount);
     bool addToBalance(float amount);

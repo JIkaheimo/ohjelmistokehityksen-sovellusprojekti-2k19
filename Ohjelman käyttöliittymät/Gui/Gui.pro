@@ -13,6 +13,7 @@ LIBS += $$PWD\..\..\build\databaseDLL.dll
 SOURCES += \
     depositview.cpp \
     eventview.cpp \
+    giftview.cpp \
     main.cpp \
     mainview.cpp \
     mainwindow.cpp \
@@ -23,6 +24,7 @@ SOURCES += \
 HEADERS += \
     depositview.h \
     eventview.h \
+    giftview.h \
     mainview.h \
     mainwindow.h \
     startview.h \
@@ -32,6 +34,7 @@ HEADERS += \
 FORMS += \
     depositview.ui \
     eventview.ui \
+    giftview.ui \
     mainview.ui \
     mainwindow.ui \
     startview.ui \

@@ -16,6 +16,7 @@
 #include <QDebug>
 #include <ui_mainwindow.h>
 
+
 const QString RFID_SRC = "RfidDLL";
 const QString DB_SRC = "DatabaseDLL";
 
@@ -73,7 +74,7 @@ MainWindow::~MainWindow()
 {
     delete ui;
 
-    // Make sure libs are correctly removed
+    // Make sure libs are correctly deleted.
     delete mRFID;
     mRFID = nullptr;
 
@@ -83,6 +84,7 @@ MainWindow::~MainWindow()
     delete mDB;
     mDB = nullptr;
 
+    // Make sure child widgets are deleted.
     delete mMainView;
     delete mStartView;
     delete mWithdrawalView;
@@ -93,11 +95,14 @@ MainWindow::~MainWindow()
 }
 
 
+/** LIB INITIALIZATIONS */
+
+
 void MainWindow::initDB()
 {
     connect(
         mDB, &DatabaseDLL::Logger,
-        [this](QString logged){
+        this, [this](QString logged){
             logger(DB_SRC, logged);
         }
     );
@@ -128,7 +133,7 @@ void MainWindow::initPin()
 
     connect(
         mPin, &PinDLL::Timeout,
-        [this]{
+        this, [this]{
             displayError(PIN_TIMEOUT_MSG);
         }
     );
@@ -138,7 +143,9 @@ void MainWindow::initRfid()
 {
     connect(
         mRFID, &RfidDLL::Logger,
-        [this](QString logged){ logger(RFID_SRC, logged); }
+        this, [this](QString logged){
+            logger(RFID_SRC, logged);
+        }
     );
 
     connect(
@@ -177,14 +184,14 @@ void MainWindow::initMainView()
 
     connect(
         mMainView, &MainView::ToWithdrawal,
-        [this]{
+        this, [this]{
             setCurrentPage(ui->pageWithdrawal);
         }
     );
 
     connect(
         mMainView, &MainView::ToEvents,
-        [this]{
+        this, [this]{
             mEventView->setEvents(mDB->getEvents());
             setCurrentPage(ui->pageEvents);
         }
@@ -192,7 +199,7 @@ void MainWindow::initMainView()
 
     connect(
         mMainView, &MainView::ToDeposit,
-        [this]{
+        this, [this]{
             setCurrentPage(ui->pageDeposit);
         }
     );
@@ -216,7 +223,7 @@ void MainWindow::initStartView()
     // Fake login
     connect(
         mStartView, &StartView::TestLogin,
-        [this]{
+        this, [this]{
             cardRead(CARD_NUMBER);
         }
     );

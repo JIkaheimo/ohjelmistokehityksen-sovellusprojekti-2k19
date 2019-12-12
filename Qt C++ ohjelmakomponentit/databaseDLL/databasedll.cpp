@@ -35,12 +35,15 @@ DatabaseDLL::DatabaseDLL()
     else
     {
         emit ErrorHappened(CONNECTION_ERROR);
+        emit Logger(CONNECTION_ERROR);
     }
+
 }
 
 DatabaseDLL::~DatabaseDLL()
 {
-    if (mDB.isOpen()) mDB.close();
+    if (mDB.isOpen())
+        mDB.close();
 
     delete mAccount;
     mAccount = nullptr;
@@ -62,8 +65,6 @@ bool DatabaseDLL::login(QString cardNumber, int pin)
  * login(cardNumber, pin)
  */
 {
-    QSqlTableModel cardModel;
-
     int accountId = mCard->validate(cardNumber, pin);
 
     if (accountId > 0)
@@ -106,7 +107,7 @@ QString DatabaseDLL::getAccountNumber()
 
 bool DatabaseDLL::deposit(float depositAmount)
 {
-    if (addToBalance(depositAmount))
+    if (depositAmount > 0 && addToBalance(depositAmount))
     {
         addEvent(Event::DEPOSIT, depositAmount);
         emit BalanceChanged(getBalance());
@@ -120,7 +121,7 @@ bool DatabaseDLL::deposit(float depositAmount)
 
 bool DatabaseDLL::withdraw(float withdrawAmount)
 {
-    if (addToBalance(-withdrawAmount))
+    if (withdrawAmount > 0 && addToBalance(-withdrawAmount))
     {
         addEvent(Event::WITHDARWAL, withdrawAmount);
         emit BalanceChanged(getBalance());
@@ -166,6 +167,16 @@ QAbstractItemModel* DatabaseDLL::getRecentEvents(int amount)
         emit Logger("No recent events available for account.");
 
     return recentEvents;
+}
+
+QAbstractItemModel *DatabaseDLL::getOtherAccounts()
+{
+    QAbstractItemModel* otherAccounts = mAccount->getOthers(mAccountId);
+
+    if (!otherAccounts->rowCount())
+        emit Logger("No other accounts available.");
+
+    return otherAccounts;
 }
 
 

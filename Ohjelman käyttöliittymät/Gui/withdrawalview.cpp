@@ -37,7 +37,7 @@ void WithdrawalView::connectWithdraw(QPushButton* button, double amount)
 {
     connect(
         button, &QPushButton::clicked,
-        [this, amount](){
+        this, [this, amount](){
             confirmAndWithdraw(amount);
         }
     );

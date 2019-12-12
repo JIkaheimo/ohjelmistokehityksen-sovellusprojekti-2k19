@@ -29,7 +29,6 @@ private:
     Event* mEvent;
 
 public:
-
     explicit DatabaseDLL();
     ~DatabaseDLL();
 
@@ -44,6 +43,7 @@ public:
 
     QAbstractItemModel* DATABASEDLL_EXPORT getEvents();
     QAbstractItemModel* DATABASEDLL_EXPORT getRecentEvents(int amount);
+    QAbstractItemModel* DATABASEDLL_EXPORT getOtherAccounts();
 
 signals:
     void DATABASEDLL_EXPORT BalanceChanged(float newBalance);
@@ -51,7 +51,6 @@ signals:
     void DATABASEDLL_EXPORT Logger(QString message);
 
 private:
-
     void addEvent(Event::Type type, float amount);
     bool addToBalance(float amount);
 };

@@ -20,6 +20,8 @@ public:
     QString getNumber(int accountId);
     int getCustomerId(int accountId);
 
+    QSqlTableModel* getOthers(int accountId);
+
 private:
     QSqlRecord selectItem(int id) override;
 };

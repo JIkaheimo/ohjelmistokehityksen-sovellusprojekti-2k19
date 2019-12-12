@@ -9,12 +9,12 @@ StartView::StartView(QWidget *parent) :
 
     connect(
         ui->btnAction, &QPushButton::clicked,
-        [this]{ emit ReadCard(); }
+        this, [this]{ emit ReadCard(); }
     );
 
     connect(
         ui->btnTest, &QPushButton::clicked,
-        [this]{ emit TestLogin(); }
+        this, [this]{ emit TestLogin(); }
     );
 }
 

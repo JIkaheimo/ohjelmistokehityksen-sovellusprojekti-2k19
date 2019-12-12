@@ -27,6 +27,13 @@ bool Account::setBalance(int accountId, float amount)
     return mModel->submit();
 }
 
+ QSqlTableModel* Account::getOthers(int accountId)
+{
+    mModel->setFilter(QString("%1 != %2").arg(ID).arg(accountId));
+    mModel->select();
+    return mModel;
+}
+
 float Account::getBalance(int accountId)
 {
     QSqlRecord account = selectItem(accountId);

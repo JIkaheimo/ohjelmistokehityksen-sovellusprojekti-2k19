@@ -9,22 +9,22 @@ MainView::MainView(QWidget *parent) :
 
     connect(
         ui->btnToEvents, &QPushButton::clicked,
-        [this]{ emit ToEvents(); }
+        this, [this]{ emit ToEvents(); }
     );
 
     connect(
         ui->btnAction, &QPushButton::clicked,
-        [this]{ emit ToWithdrawal(); }
+        this, [this]{ emit ToWithdrawal(); }
     );
 
     connect(
         ui->btnToDeposit, &QPushButton::clicked,
-        [this]{ emit ToDeposit(); }
+        this, [this]{ emit ToDeposit(); }
     );
 
     connect(
         ui->btnToOverview, &QPushButton::clicked,
-        [this]{ emit ToOverview(); }
+        this, [this]{ emit ToOverview(); }
     );
 }
 

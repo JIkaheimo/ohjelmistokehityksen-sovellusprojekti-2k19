@@ -23,8 +23,8 @@ MainView::MainView(QWidget *parent) :
     );
 
     connect(
-        ui->btnToOverview, &QPushButton::clicked,
-        this, [this]{ emit ToOverview(); }
+        ui->btnToSummary, &QPushButton::clicked,
+        this, [this]{ emit ToSummary(); }
     );
 }
 

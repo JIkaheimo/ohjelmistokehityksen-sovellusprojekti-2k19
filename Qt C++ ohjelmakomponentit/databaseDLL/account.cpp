@@ -5,8 +5,6 @@
 #include <QString>
 #include <QSqlRecord>
 
-#include <QDebug>
-
 const QString TABLE = "account";
 const QString ID = "id";
 const QString NUMBER = "number";

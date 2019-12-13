@@ -1,73 +1,49 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "eventview.h"
-#include "mainview.h"
-#include "depositview.h"
-#include "withdrawalview.h"
-#include "startview.h"
-#include "summaryview.h"
-
 #include "databasedll.h"
 #include "rfiddll.h"
 #include "pindll.h"
 
+#include "Constants.h"
+
 #include <QMessageBox>
 #include <QDebug>
+
 #include <ui_mainwindow.h>
-
-
-const QString RFID_SRC = "RfidDLL";
-const QString DB_SRC = "DatabaseDLL";
-
-const QString WITHDRAWAL_MSG = "Succesfully withdrew money from the account. Remember to take the bills from the dispenser.";
-const QString WITHDRAWAL_ERROR = "Account doesn't have enough funds for the withdrawal.";
-
-const QString DEPOSIT_MSG = "Money was succesfully added to the account.";
-const QString DEPOSIT_ERROR = "Could not add money to the account, please take it from the dispenser";
-
-const QString PIN_TIMEOUT_MSG = "Please input your pin code within 10 seconds.";
-
-const QString LOGOUT_MSG = "Thank you for using BankSimul. See you again!";
-
-const QString CARD_NUMBER = "0A0079C7BF";
-const QString PORT = "COM3";
 
 
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
 
-    mDB(new DatabaseDLL()),
-    mRFID(new RfidDLL()),
-    mPin(new PinDLL()),
-    mPageHistory(new QStack<QWidget*>),
+    m_db(new DatabaseDLL()),
+    m_rfid(new RfidDLL()),
+    m_pin(new PinDLL()),
 
     ui(new Ui::MainWindow)
 {
 
     // GUI initialization
+
     ui->setupUi(this);
 
-    connect(
-        ui->btnBack, &QPushButton::clicked,
-        this, &MainWindow::previousPage
-    );
+    connect(ui->btnBack, &QPushButton::clicked,
+            this, &MainWindow::previousView);
 
     initStartView();
     initMainView();
     initWithdrawalView();
     initDepositView();
-    initEventView();
-    mSummaryView = new SummaryView(this);
-    ui->layoutSummary->addWidget(mSummaryView);
 
-    showPage(ui->pageStart);
+    showView(ui->startView);
+
     show();
 
     // Library initialization
+
+    initPin();
     initRfid();
     initDB();
-    initPin();
 }
 
 MainWindow::~MainWindow()
@@ -75,90 +51,61 @@ MainWindow::~MainWindow()
     delete ui;
 
     // Make sure libs are correctly deleted.
-    delete mRFID;
-    mRFID = nullptr;
+    delete m_rfid;
+    m_rfid = nullptr;
 
-    delete mPin;
-    mPin = nullptr;
+    delete m_pin;
+    m_pin = nullptr;
 
-    delete mDB;
-    mDB = nullptr;
-
-    // Make sure child widgets are deleted.
-    delete mMainView;
-    delete mStartView;
-    delete mWithdrawalView;
-    delete mDepositView;
-    delete mEventView;
-    delete mSummaryView;
-    delete mPageHistory;
+    delete m_db;
+    m_db = nullptr;
 }
 
 
 /** LIB INITIALIZATIONS */
 
 
-void MainWindow::initDB()
+bool MainWindow::initDB()
 {
-    connect(
-        mDB, &DatabaseDLL::Logger,
-        this, [this](QString logged){
-            logger(DB_SRC, logged);
-        }
-    );
 
-    connect(
-        mDB, &DatabaseDLL::ErrorHappened,
-        this, &MainWindow::displayError
-    );
+    connect(m_db, &DatabaseDLL::ErrorHappened,
+            this, &MainWindow::displayError);
 
-    connect(
-        mDB, &DatabaseDLL::BalanceChanged,
-        this, &MainWindow::showBalance
-    );
+    connect(m_db, &DatabaseDLL::Logger,
+            this, [=](QString logged){ logger(Logger::DB, logged); });
 
+    connect(m_db, &DatabaseDLL::BalanceChanged,
+            this, &MainWindow::showBalance);
+
+    return m_db->init();
 }
+
 
 void MainWindow::initPin()
 {
-    connect(
-        mPin, &PinDLL::Logger,
-        this, &MainWindow::logger
-    );
+    connect(m_pin, &PinDLL::Logger,
+            this, &MainWindow::logger);
 
-    connect(
-        mPin, &PinDLL::PinEntered,
-        this, &MainWindow::pinEntered
-    );
+    connect(m_pin, &PinDLL::PinEntered,
+            this, &MainWindow::onPinEntered);
 
-    connect(
-        mPin, &PinDLL::Timeout,
-        this, [this]{
-            displayError(PIN_TIMEOUT_MSG);
-        }
-    );
+    connect(m_pin, &PinDLL::Timeout,
+        this, [=]{ displayError(BSError::PinTimeout); });
 }
+
 
 void MainWindow::initRfid()
 {
-    connect(
-        mRFID, &RfidDLL::Logger,
-        this, [this](QString logged){
-            logger(RFID_SRC, logged);
-        }
-    );
+    connect(m_rfid, &RfidDLL::Logger,
+            this, [=](QString logged){ logger(Logger::Rfid, logged); });
 
-    connect(
-        mRFID, &RfidDLL::ErrorHappened,
-        this, &MainWindow::displayError
-    );
+    connect(m_rfid, &RfidDLL::ErrorHappened,
+            this, &MainWindow::displayError);
 
-    if (mRFID->readData(PORT))
+    if (m_rfid->readData(Default::Port))
     {
-        connect(
-            mRFID, &RfidDLL::CardRead,
-            this, &MainWindow::cardRead
-        );
+        connect(m_rfid, &RfidDLL::CardRead,
+                this, &MainWindow::onCardRead);
     }
 }
 
@@ -171,38 +118,17 @@ void MainWindow::initMainView()
   * Initializes MainView with any required connections.
   */
 {
-    // Create view.
-    mMainView = new MainView(this);
-    ui->layoutMain->addWidget(mMainView);
+    connect(ui->mainView, &MainView::ToSummary,
+            this, &MainWindow::toSummaryView);
 
-    // Navigation connections.
+    connect(ui->mainView, &MainView::ToWithdrawal,
+            this, &MainWindow::toWithdrawalView);
 
-    connect(
-        mMainView, &MainView::ToOverview,
-        this, &MainWindow::toSummaryView
-    );
+    connect(ui->mainView, &MainView::ToEvents,
+            this, &MainWindow::toEventView);
 
-    connect(
-        mMainView, &MainView::ToWithdrawal,
-        this, [this]{
-            setCurrentPage(ui->pageWithdrawal);
-        }
-    );
-
-    connect(
-        mMainView, &MainView::ToEvents,
-        this, [this]{
-            mEventView->setEvents(mDB->getEvents());
-            setCurrentPage(ui->pageEvents);
-        }
-    );
-
-    connect(
-        mMainView, &MainView::ToDeposit,
-        this, [this]{
-            setCurrentPage(ui->pageDeposit);
-        }
-    );
+    connect(ui->mainView, &MainView::ToDeposit,
+            this, &MainWindow::toDepositView);
 }
 
 
@@ -211,23 +137,11 @@ void MainWindow::initStartView()
   * Initializes StartView with any required connections.
   */
 {
-    // Create view.
-    mStartView = new StartView(this);
-    ui->layoutStart->addWidget(mStartView);
+    connect(ui->startView, &StartView::ReadCard,
+            this, &MainWindow::readCard);
 
-    connect(
-        mStartView, &StartView::ReadCard,
-        this, &MainWindow::readCard
-    );
-
-    // Fake login
-    connect(
-        mStartView, &StartView::TestLogin,
-        this, [this]{
-            cardRead(CARD_NUMBER);
-        }
-    );
-
+    connect(ui->startView, &StartView::TestLogin,
+            this, [=]{ onCardRead(Default::Card); });
 }
 
 
@@ -236,21 +150,11 @@ void MainWindow::initWithdrawalView()
   * Initializes WithdrawalView with any required connections.
   */
 {
-    // Create view.
-    mWithdrawalView = new WithdrawalView(this);
-    ui->layoutWithdrawal->addWidget(mWithdrawalView);
+    connect(ui->withdrawalView, &WithdrawalView::Withdraw,
+            this, &MainWindow::onWithdrawal);
 
-    // Listen for any withdrawal events.
-    connect(
-        mWithdrawalView, &WithdrawalView::Withdraw,
-        this, &MainWindow::onWithdrawal
-    );
-
-    // Update withdrawal controls based on the account balance.
-    connect(
-        mDB, &DatabaseDLL::BalanceChanged,
-        mWithdrawalView, &WithdrawalView::setWithdrawable
-    );
+    connect(m_db, &DatabaseDLL::BalanceChanged,
+            ui->withdrawalView, &WithdrawalView::setWithdrawable);
 }
 
 
@@ -259,121 +163,120 @@ void MainWindow::initDepositView()
   * Initializes DepositView with any required connections.
   */
 {
-    // Create view.
-    mDepositView = new DepositView(this);
-    ui->layoutDeposit->addWidget(mDepositView);
-
     // Listen for any deposit events.
-    connect(
-        mDepositView, &DepositView::Deposit,
-        this, &MainWindow::onDeposit
-    );
+    connect(ui->depositView, &DepositView::Deposit,
+            this, &MainWindow::onDeposit);
 }
 
 
-void MainWindow::initEventView()
-/**
-  * Initializes EventView with any required connections.
-  */
-{
-    // Create view.
-    mEventView = new EventView(this);
-    ui->layoutEvents->addWidget(mEventView);
-
-    // Listen for any login events.
-
-}
-
-
-void MainWindow::setCurrentPage(QWidget* page)
+void MainWindow::setCurrentView(QWidget* view)
 {
     // Save the previous page to page history.
-    QWidget* currentPage = ui->pageStack->currentWidget();
-    mPageHistory->push(currentPage);
+    QWidget* currentPage = ui->viewStack->currentWidget();
+    m_viewHistory.push(currentPage);
 
-    showPage(page);
+    showView(view);
 }
 
 
-void MainWindow::showPage(QWidget* page)
+void MainWindow::showView(QWidget* view)
 {
-    bool isStartPage = page == ui->pageStart;
-    bool isMainPage = page == ui->pageMain;
+    bool isStartView = view == ui->startView;
+    bool isMainView = view == ui->mainView;
 
-    bool showBackButton = !isStartPage;
-    bool showBalance = !isStartPage;
+    QString btnText = (isMainView) ? "Logout" : "Back";
 
-    QString btnText = (isMainPage) ? "Logout" : "Back";
+    ui->viewStack->setCurrentWidget(view);
 
-    ui->pageStack->setCurrentWidget(page);
-
-    ui->labelBalance->setVisible(showBalance);
+    ui->labelBalance->setVisible(!isStartView);
 
     ui->btnBack->setText(btnText);
-    ui->btnBack->setVisible(showBackButton);
-    ui->labelHeader->setVisible(isStartPage);
+    ui->btnBack->setVisible(!isStartView);
+    ui->labelHeader->setVisible(isStartView);
 }
 
 
-void MainWindow::previousPage()
+void MainWindow::previousView()
 {    
-    if (!mPageHistory->isEmpty())
+    if (!m_viewHistory.isEmpty())
     {
-        QWidget* previousPage = mPageHistory->pop();
-        showPage(previousPage);
+        QWidget* previousView = m_viewHistory.pop();
+        showView(previousView);
     }
 
-    if (mPageHistory->isEmpty())
-        // TODO: "Logout" from the database interface.
-        displayInfo(LOGOUT_MSG);
+    // If the stack is empty, user is back to the start view
+    // -> Logout
+    if (m_viewHistory.isEmpty())
+    {
+        m_db->logout();
+        displayInfo(BSMessage::Logout);
+    }
 
 }
 
 
 void MainWindow::onDeposit(float amount)
 {
-    if (mDB->deposit(amount))
-        displayInfo(DEPOSIT_MSG);
+    if (m_db->deposit(amount))
+        displayInfo(BSMessage::Deposit);
     else
-        displayError(DEPOSIT_ERROR);
+        displayError(BSError::Deposit);
 }
 
 
 void MainWindow::onWithdrawal(float amount)
 {
-    if (mDB->withdraw(amount))
-        displayInfo(WITHDRAWAL_MSG);
+    if (m_db->withdraw(amount))
+        displayInfo(BSMessage::Withdrawal);
     else
-        displayError(WITHDRAWAL_ERROR);
+        displayError(BSError::Withdrawal);
 }
 
 
 void MainWindow::readCard()
 {
-   mRFID->readData(PORT);
+   m_rfid->readData(Default::Port);
 }
 
 
-void MainWindow::cardRead(QString cardNumber)
+void MainWindow::onCardRead(QString cardNumber)
 {
-    mCardNumber = cardNumber;
-    mPin->getPin(this);
+    m_cardNumber = cardNumber;
+    m_pin->getPin(this);
 }
 
 void MainWindow::toSummaryView()
 {
-    mSummaryView->setOwner(mDB->getAccountOwner());
-    mSummaryView->setAccountNumber(mDB->getAccountNumber());
-    mSummaryView->setEvents(mDB->getRecentEvents(5));
-    setCurrentPage(ui->pageSummary);
+    ui->summaryView->setOwner(m_db->getAccountOwner());
+    ui->summaryView->setAccountNumber(m_db->getAccountNumber());
+    ui->summaryView->setEvents(*m_db->getRecentEvents(Default::NumRecentEvents));
+
+    setCurrentView(ui->summaryView);
 }
 
 
-void MainWindow::pinEntered(int pinCode)
+void MainWindow::toWithdrawalView()
 {
+    setCurrentView(ui->withdrawalView);
+}
 
-    if (mDB->login(mCardNumber, pinCode))
-        setCurrentPage(ui->pageMain);
+
+void MainWindow::toEventView()
+{
+    ui->eventView->setEvents(m_db->getEvents());
+    setCurrentView(ui->eventView);
+}
+
+void MainWindow::toDepositView()
+{
+    setCurrentView(ui->depositView);
+}
+
+
+void MainWindow::onPinEntered(int pinCode)
+{
+    if (m_db->login(m_cardNumber, pinCode))
+        setCurrentView(ui->mainView);
 }
 
 

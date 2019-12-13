@@ -1,3 +1,8 @@
+#include "card.h"
+#include "account.h"
+#include "customer.h"
+#include "event.h"
+
 #include "databasedll.h"
 
 #include <QSqlQuery>
@@ -7,35 +12,13 @@ const QString USERNAME = "c8ikja00";
 const QString PASSWORD = "8uL4khDtm2H6H7ag";
 const QString DB_NAME = "opisk_c8ikja00";
 
-// CARD CONSTANTS
-const QString CARD_TABLE = "card";
-const QString CARD_ID = "id";
-const QString CARD_NUMBER = "identifier";
-const QString CARD_PIN = "pin";
-const QString CARD_ACCOUNT = "idAccount";
-
-// ACCOUNTS CONSTANTS
-const QString ACCOUNT_TABLE = "account";
-const QString ACCOUNT_ID = "id";
-const QString ACCOUNT_NUMBER = "number";
-const QString ACCOUNT_BALANCE = "balance";
-
-// EVENT CONSTANTS
-const QString EVENT_TABLE = "event";
-const QString EVENT_ID = "id";
-const QString EVENT_TYPE = "type";
-const QString EVENT_TIME = "time";
-const QString EVENT_AMOUNT = "amount";
-const QString EVENT_ACCOUNT = "idAccount";
-
 const QString DEPOSIT_ERROR = "Could not deposit funds to account.";
+const QString CONNECTION_ERROR = "Could not connect to database.";
 
 
 DatabaseDLL::DatabaseDLL()
     :
-      mDB(QSqlDatabase::addDatabase("QMYSQL")),
-      mAccount(new QSqlTableModel(nullptr, mDB)),
-      mEvents(new QSqlTableModel(nullptr, mDB))
+      mDB(QSqlDatabase::addDatabase("QMYSQL"))
 {
     mDB.setHostName(HOST_NAME);
     mDB.setUserName(USERNAME);
@@ -44,12 +27,14 @@ DatabaseDLL::DatabaseDLL()
 
     if (mDB.open())
     {
-        mAccount->setTable(ACCOUNT_TABLE);
-        mEvents->setTable(EVENT_TABLE);
+        mAccount = new Account(mDB);
+        mCard = new Card(mDB);
+        mEvent = new Event(mDB);
+        mCustomer = new Customer(mDB);
     }
     else
     {
-        emit ErrorHappened("Could not connect to database.");
+        emit ErrorHappened(CONNECTION_ERROR);
     }
 }
 
@@ -60,8 +45,15 @@ DatabaseDLL::~DatabaseDLL()
     delete mAccount;
     mAccount = nullptr;
 
-    delete mEvents;
-    mEvents = nullptr;
+    delete mEvent;
+    mEvent = nullptr;
+
+    delete mCard;
+    mCard = nullptr;
+
+    delete mCustomer;
+    mCustomer = nullptr;
+
 }
 
 
@@ -72,34 +64,22 @@ bool DatabaseDLL::login(QString cardNumber, int pin)
 {
     QSqlTableModel cardModel;
 
-    cardModel.setTable(CARD_TABLE);
-    cardModel.setFilter(
-        QString("%1 = '%2' AND %3 = %4")
-            .arg(CARD_NUMBER)
-            .arg(cardNumber)
-            .arg(CARD_PIN)
-            .arg(pin)
-    );
+    int accountId = mCard->validate(cardNumber, pin);
 
-    if (cardModel.select() && cardModel.rowCount() == 1)
+    if (accountId > 0)
     {
-        QString accountID = cardModel.record(0).value(CARD_ACCOUNT).toString();
+        mAccountId = accountId;
 
-        mEvents->setFilter("idAccount = " + accountID);
-        mEvents->sort(4, Qt::DescendingOrder);
-        mAccount->setFilter("id = " + accountID);
-        mEvents->select();
-        mAccount->select();
-
-        emit Logger("Login successful for account (ID): " + accountID);
-        emit BalanceChanged(getBalance());
-        emit UserAuthenticated();
+        emit Logger(QString("Login successful for account with id %1.").arg(mAccountId));
+        emit BalanceChanged(mAccount->getBalance(mAccountId));
 
         return true;
     }
     else
     {
+        emit Logger("Login failed. Please give correct login credentials.");
         emit ErrorHappened("Login failed. Please give correct login credentials.");
+
         return false;
     }
 }
@@ -109,20 +89,26 @@ float DatabaseDLL::getBalance()
   * Returns the selected account's balance.
   */
 {
-    if (!mAccount->select())
-        emit Logger("Error fetching account's balance from the database.");
-
-    if (mAccount->rowCount() != 1)
-        emit Logger("There were incorrect amount of accounts selected while getting balance...");
-
-    return mAccount->record(0).value(ACCOUNT_BALANCE).toFloat();
+    return mAccount->getBalance(mAccountId);
 }
+
+QString DatabaseDLL::getAccountOwner()
+{
+    int customerId = mAccount->getCustomerId(mAccountId);
+    return mCustomer->getName(customerId);
+}
+
+QString DatabaseDLL::getAccountNumber()
+{
+    return mAccount->getNumber(mAccountId);
+}
+
 
 bool DatabaseDLL::deposit(float depositAmount)
 {
     if (addToBalance(depositAmount))
     {
-        addEvent(EVENT::DEPOSIT, depositAmount);
+        addEvent(Event::DEPOSIT, depositAmount);
         emit BalanceChanged(getBalance());
         return true;
     }
@@ -136,7 +122,7 @@ bool DatabaseDLL::withdraw(float withdrawAmount)
 {
     if (addToBalance(-withdrawAmount))
     {
-        addEvent(EVENT::WITHDARWAL, withdrawAmount);
+        addEvent(Event::WITHDARWAL, withdrawAmount);
         emit BalanceChanged(getBalance());
         return true;
     }
@@ -146,47 +132,40 @@ bool DatabaseDLL::withdraw(float withdrawAmount)
 }
 
 
-void DatabaseDLL::addEvent(EVENT evtType, float amount)
+void DatabaseDLL::addEvent(Event::Type evtType, float amount)
 {
     QString type = "unknown";
 
-    if (evtType == EVENT::DEPOSIT) {
+    if (evtType == Event::DEPOSIT)
         type = "deposit";
-    }
     else
-    {
         type = "withdraw";
-    }
 
-    // Generate event timestamp
-    QDateTime timestamp = QDateTime::currentDateTime();
 
-    // Create and populate a new event record.
-    QSqlRecord newEvent = mEvents->record();
-
-    newEvent.setValue(EVENT_TYPE, type);
-    newEvent.setValue(EVENT_ACCOUNT, mAccount->record(0).value(ACCOUNT_ID));
-    newEvent.setValue(EVENT_TIME, timestamp.toString("yyyy-MM-dd hh:mm:ss"));
-    newEvent.setValue(EVENT_AMOUNT, amount);
-
-    mEvents->insertRecord(-1, newEvent);
-    mEvents->submitAll();
-
-    mEvents->select();
+    if (!mEvent->addEvent(mAccountId, evtType, amount))
+        emit Logger("Could not add event to database.");
 }
 
-QSqlTableModel* DatabaseDLL::getEvents()
-/**
-  * Returns the events for the account being used.
-  */
+
+QAbstractItemModel* DatabaseDLL::getEvents()
 {
-    if (!mEvents->select())
-        emit Logger("Error fetching events from the database.");
+    QAbstractItemModel* events = mEvent->getEvents(mAccountId);
 
-    if (!mEvents->rowCount())
-        emit Logger("No events available for account");
+    if (!events->rowCount())
+        emit Logger("No events available for account.");
 
-    return mEvents;
+    return events;
+}
+
+
+QAbstractItemModel* DatabaseDLL::getRecentEvents(int amount)
+{
+    QAbstractItemModel* recentEvents = mEvent->getRecentEvents(mAccountId, amount);
+
+    if (!recentEvents->rowCount())
+        emit Logger("No recent events available for account.");
+
+    return recentEvents;
 }
 
 
@@ -196,14 +175,7 @@ bool DatabaseDLL::addToBalance(float amount)
 
     // Make sure the balance cannot be negative.
     if (newBalance < 0)
-    {
         return false;
-    }
 
-    // Update the record
-    QSqlRecord record = mAccount->record(0);
-    record.setValue(ACCOUNT_BALANCE, newBalance);
-    mAccount->setRecord(0, record);
-
-    return mAccount->submit();
+    return mAccount->setBalance(mAccountId, newBalance);
 }

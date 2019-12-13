@@ -3,18 +3,23 @@
 
 #include <QMainWindow>
 
-#include "databasedll.h"
-#include "rfiddll.h"
-#include "pindll.h"
-
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+class MainView;
+class StartView;
+class WithdrawalView;
+class DepositView;
+class EventView;
+class SummaryView;
+
+class DatabaseDLL;
+class RfidDLL;
+class PinDLL;
 
 class MainWindow : public QMainWindow
 {
-
     Q_OBJECT
 
 private:
@@ -22,33 +27,49 @@ private:
     RfidDLL* mRFID;
     PinDLL* mPin;
 
-    QStack<QWidget*> mPageHistory;
+    MainView* mMainView;
+    StartView* mStartView;
+    WithdrawalView* mWithdrawalView;
+    DepositView* mDepositView;
+    EventView* mEventView;
+    SummaryView* mSummaryView;
+
+    QStack<QWidget*>* mPageHistory;
     QString mCardNumber = "";
 
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+
 private slots:
     void pinEntered(int pinCode);
-
-    void previousPage();
-
     void cardRead(QString cardNumber);
     void readCard();
-    void test();
 
-    void setCurrentPage(QWidget& page);
+    void setCurrentPage(QWidget* page);
+    void previousPage();
 
+    // Logging and dialogs
     void logger(QString source, QString description);
     void displayError(QString message);
+    void displayInfo(QString message);
+
+    void onWithdrawal(float amount);
+    void onDeposit(float amount);
+
+    void toSummaryView();
 
 private:
     Ui::MainWindow *ui;
 
     void showBalance(float balance);
+    void showPage(QWidget* page);
 
+    // DLL initializators
     void initRfid();
+    void initDB();
+    void initPin();
 
     // View initializators
     void initWithdrawalView();
@@ -56,8 +77,6 @@ private:
     void initEventView();
     void initMainView();
     void initStartView();
-
-    void showPage(QWidget &page);
 
 };
 #endif // MAINWINDOW_H

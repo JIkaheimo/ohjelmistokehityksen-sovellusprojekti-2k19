@@ -38,20 +38,21 @@
    <string notr="true">QPushButton {
 	padding:  10px;
 	font-size: 14px;
-	font-weight: bold;
 }
 
 QPushButton#btnBack {
 	color: rgb(255, 255, 255);
 	background-color: #d9534f;
+font-weight: bold;
 }
 
 QPushButton#btnAction {
 	background-color: #5cb85c;;
 	color: rgb(255, 255, 255);
+font-weight: bold;
 }
 
-QDoubleSpinBox, QLineEdit {
+QDoubleSpinBox, QLineEdit, QSpinBox {
 	font-size: 20px;
 }
 
@@ -83,24 +84,35 @@ QTableView {
         <property name="horizontalSpacing">
          <number>0</number>
         </property>
-        <item row="0" column="1">
+        <item row="0" column="2">
          <widget class="QLabel" name="labelBalance">
           <property name="enabled">
            <bool>true</bool>
           </property>
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="font">
            <font>
-            <pointsize>14</pointsize>
+            <family>Times New Roman</family>
+            <pointsize>15</pointsize>
+            <weight>50</weight>
+            <italic>false</italic>
+            <bold>false</bold>
            </font>
           </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);
+font: 15pt &quot;Times New Roman&quot;;
+padding: 8px;
+</string>
+          </property>
           <property name="text">
-           <string>Balance is shown here</string>
+           <string>BAL: 51.92€</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -110,7 +122,7 @@ QTableView {
         <item row="0" column="0">
          <widget class="QPushButton" name="btnBack">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -126,23 +138,36 @@ QTableView {
           </property>
          </widget>
         </item>
-        <item row="4" column="0" colspan="2">
-         <widget class="QLabel" name="labelHeader">
-          <property name="font">
-           <font>
-            <family>Algerian</family>
-            <pointsize>32</pointsize>
-           </font>
+        <item row="0" column="1">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
-          <property name="text">
-           <string>BankSimul</string>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
           </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
+         </spacer>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelHeader">
+        <property name="font">
+         <font>
+          <family>Algerian</family>
+          <pointsize>32</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>BankSimul</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QStackedWidget" name="pageStack">
@@ -154,8 +179,39 @@ QTableView {
           </sizepolicy>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item row="0" column="0">
            <layout class="QGridLayout" name="layoutStart"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pageSummary">
+         <layout class="QGridLayout" name="gridLayout_3">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="layoutSummary"/>
           </item>
          </layout>
         </widget>
@@ -167,6 +223,18 @@ QTableView {
           </sizepolicy>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item row="0" column="0">
            <layout class="QGridLayout" name="layoutWithdrawal"/>
           </item>
@@ -174,6 +242,18 @@ QTableView {
         </widget>
         <widget class="QWidget" name="pageDeposit">
          <layout class="QGridLayout" name="gridLayout_9">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item row="0" column="0">
            <layout class="QGridLayout" name="layoutDeposit"/>
           </item>
@@ -181,6 +261,18 @@ QTableView {
         </widget>
         <widget class="QWidget" name="pageEvents">
          <layout class="QGridLayout" name="gridLayout">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item row="0" column="0">
            <layout class="QGridLayout" name="layoutEvents"/>
           </item>
@@ -188,6 +280,18 @@ QTableView {
         </widget>
         <widget class="QWidget" name="pageMain">
          <layout class="QGridLayout" name="gridLayout_8">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item row="0" column="0">
            <layout class="QGridLayout" name="layoutMain"/>
           </item>

@@ -17,6 +17,7 @@ SOURCES += \
     mainview.cpp \
     mainwindow.cpp \
     startview.cpp \
+    summaryview.cpp \
     withdrawalview.cpp
 
 HEADERS += \
@@ -25,6 +26,7 @@ HEADERS += \
     mainview.h \
     mainwindow.h \
     startview.h \
+    summaryview.h \
     withdrawalview.h
 
 FORMS += \
@@ -33,6 +35,7 @@ FORMS += \
     mainview.ui \
     mainwindow.ui \
     startview.ui \
+    summaryview.ui \
     withdrawalview.ui
 
 # Default rules for deployment.

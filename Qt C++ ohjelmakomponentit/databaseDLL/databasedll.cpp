@@ -4,59 +4,73 @@
 #include "event.h"
 
 #include "databasedll.h"
+#include "LibConstants.h"
 
 #include <QSqlQuery>
-
-const QString HOST_NAME = "mysli.oamk.fi";
-const QString USERNAME = "c8ikja00";
-const QString PASSWORD = "8uL4khDtm2H6H7ag";
-const QString DB_NAME = "opisk_c8ikja00";
-
-const QString DEPOSIT_ERROR = "Could not deposit funds to account.";
-const QString CONNECTION_ERROR = "Could not connect to database.";
+#include <QAbstractItemModel>
+#include <QSqlTableModel>
 
 
 DatabaseDLL::DatabaseDLL()
-    :
-      mDB(QSqlDatabase::addDatabase("QMYSQL"))
+    : m_db(QSqlDatabase::addDatabase("QMYSQL"))
 {
-    mDB.setHostName(HOST_NAME);
-    mDB.setUserName(USERNAME);
-    mDB.setPassword(PASSWORD);
-    mDB.setDatabaseName(DB_NAME);
-
-    if (mDB.open())
-    {
-        mAccount = new Account(mDB);
-        mCard = new Card(mDB);
-        mEvent = new Event(mDB);
-        mCustomer = new Customer(mDB);
-    }
-    else
-    {
-        emit ErrorHappened(CONNECTION_ERROR);
-        emit Logger(CONNECTION_ERROR);
-    }
-
 }
+
 
 DatabaseDLL::~DatabaseDLL()
 {
-    if (mDB.isOpen())
-        mDB.close();
+    if (m_db.isOpen())
+    {
+        m_db.close();
+    }
 
-    delete mAccount;
-    mAccount = nullptr;
+    delete m_account;
+    m_account = nullptr;
 
-    delete mEvent;
-    mEvent = nullptr;
+    delete m_event;
+    m_event = nullptr;
 
-    delete mCard;
-    mCard = nullptr;
+    delete m_card;
+    m_card = nullptr;
 
-    delete mCustomer;
-    mCustomer = nullptr;
+    delete m_customer;
+    m_customer = nullptr;
 
+}
+
+
+bool DatabaseDLL::init()
+/**
+  * Initializes the connection to database.
+  *
+  * Returns:
+  * true if the connection was successful,
+  * false otherwise
+  */
+{
+    m_db.setHostName(Config::Host);
+    m_db.setUserName(Config::User);
+    m_db.setPassword(Config::Password);
+    m_db.setDatabaseName(Config::Database);
+
+    if (m_db.open())
+    {
+        m_account = new Account(m_db);
+        m_card = new Card(m_db);
+        m_event = new Event(m_db);
+        m_customer = new Customer(m_db);
+
+        emit Logger(DBSuccess::Connection);
+
+        return true;
+    }
+    else
+    {
+        emit ErrorHappened(DBError::Connection);
+        emit Logger(DBError::Connection);
+
+        return false;
+    }
 }
 
 
@@ -65,92 +79,115 @@ bool DatabaseDLL::login(QString cardNumber, int pin)
  * login(cardNumber, pin)
  */
 {
-    int accountId = mCard->validate(cardNumber, pin);
+    int accountId = m_card->validate(cardNumber, pin);
 
     if (accountId > 0)
     {
-        mAccountId = accountId;
+        m_accountId = accountId;
 
-        emit Logger(QString("Login successful for account with id %1.").arg(mAccountId));
-        emit BalanceChanged(mAccount->getBalance(mAccountId));
+        emit Logger(QString(DBSuccess::Auth).arg(m_accountId));
+        emit BalanceChanged(m_account->getBalance(m_accountId));
 
         return true;
     }
     else
     {
-        emit Logger("Login failed. Please give correct login credentials.");
-        emit ErrorHappened("Login failed. Please give correct login credentials.");
+        emit Logger(DBError::Auth);
+        emit ErrorHappened(DBError::Auth);
 
         return false;
     }
 }
 
-float DatabaseDLL::getBalance()
-/**
-  * Returns the selected account's balance.
-  */
+
+bool DatabaseDLL::isLoggedIn()
 {
-    return mAccount->getBalance(mAccountId);
+    return m_accountId != -1;
 }
+
+
+void DatabaseDLL::logout()
+{
+    m_accountId = -1;
+}
+
+
+float DatabaseDLL::getBalance()
+{
+    if (!checkLogin()) return -1;
+
+    return m_account->getBalance(m_accountId);
+}
+
 
 QString DatabaseDLL::getAccountOwner()
 {
-    int customerId = mAccount->getCustomerId(mAccountId);
-    return mCustomer->getName(customerId);
+    if (!checkLogin()) return "";
+
+    int customerId = m_account->getCustomerId(m_accountId);
+    return m_customer->getName(customerId);
 }
+
 
 QString DatabaseDLL::getAccountNumber()
 {
-    return mAccount->getNumber(mAccountId);
+    if (!checkLogin()) return "";
+
+    return m_account->getNumber(m_accountId);
 }
 
 
-bool DatabaseDLL::deposit(float depositAmount)
+bool DatabaseDLL::deposit(float amount)
 {
-    if (depositAmount > 0 && addToBalance(depositAmount))
+    if (amount > 0 && checkLogin() && addToBalance(amount))
     {
-        addEvent(Event::DEPOSIT, depositAmount);
-        emit BalanceChanged(getBalance());
+        float newBalance = getBalance();
+        addEvent(Event::Deposit, amount, newBalance);
+        emit BalanceChanged(newBalance);
+
         return true;
     }
 
-    emit ErrorHappened(DEPOSIT_ERROR);
+    emit ErrorHappened(DBError::Deposit);
     return false;
 }
 
 
-bool DatabaseDLL::withdraw(float withdrawAmount)
+bool DatabaseDLL::withdraw(float amount)
 {
-    if (withdrawAmount > 0 && addToBalance(-withdrawAmount))
+    if (amount > 0 && checkLogin() && addToBalance(-amount))
     {
-        addEvent(Event::WITHDARWAL, withdrawAmount);
-        emit BalanceChanged(getBalance());
+        float newBalance = getBalance();
+        addEvent(Event::Withdrawal, -amount, newBalance);
+        emit BalanceChanged(newBalance);
+
         return true;
     }
 
-    emit ErrorHappened("Could not withdraw funds from account.");
+    emit ErrorHappened(DBError::Withdraw);
     return false;
 }
 
 
-void DatabaseDLL::addEvent(Event::Type evtType, float amount)
+bool DatabaseDLL::transaction(int receiverId, float amount)
 {
-    QString type = "unknown";
-
-    if (evtType == Event::DEPOSIT)
-        type = "deposit";
-    else
-        type = "withdraw";
+    // PLACEHOLDER
+    return true;
+}
 
 
-    if (!mEvent->addEvent(mAccountId, evtType, amount))
+void DatabaseDLL::addEvent(Event::Type evtType, float amount, float balance)
+{
+    if (!m_event->addEvent(m_accountId, evtType, amount, balance))
         emit Logger("Could not add event to database.");
 }
 
 
 QAbstractItemModel* DatabaseDLL::getEvents()
 {
-    QAbstractItemModel* events = mEvent->getEvents(mAccountId);
+    if (!checkLogin()) return nullptr;
+
+    QAbstractItemModel* events = m_event->getEvents(m_accountId);
 
     if (!events->rowCount())
         emit Logger("No events available for account.");
@@ -159,9 +196,11 @@ QAbstractItemModel* DatabaseDLL::getEvents()
 }
 
 
-QAbstractItemModel* DatabaseDLL::getRecentEvents(int amount)
+QAbstractItemModel* DatabaseDLL::getRecentEvents(int number)
 {
-    QAbstractItemModel* recentEvents = mEvent->getRecentEvents(mAccountId, amount);
+    if (!checkLogin()) return nullptr;
+
+    QAbstractItemModel* recentEvents = m_event->getRecentEvents(m_accountId, number);
 
     if (!recentEvents->rowCount())
         emit Logger("No recent events available for account.");
@@ -169,9 +208,12 @@ QAbstractItemModel* DatabaseDLL::getRecentEvents(int amount)
     return recentEvents;
 }
 
+
 QAbstractItemModel *DatabaseDLL::getOtherAccounts()
 {
-    QAbstractItemModel* otherAccounts = mAccount->getOthers(mAccountId);
+    if (!checkLogin()) return nullptr;
+
+    QAbstractItemModel* otherAccounts = m_account->getOthers(m_accountId);
 
     if (!otherAccounts->rowCount())
         emit Logger("No other accounts available.");
@@ -188,5 +230,25 @@ bool DatabaseDLL::addToBalance(float amount)
     if (newBalance < 0)
         return false;
 
-    return mAccount->setBalance(mAccountId, newBalance);
+    return m_account->setBalance(m_accountId, newBalance);
+}
+
+
+bool DatabaseDLL::checkLogin()
+/**
+  * Helper to check if the user has actually logged in,
+  * with logging and error emits.
+  */
+{
+    if (isLoggedIn())
+    {
+        return true;
+    }
+    else
+    {
+        Logger(DBError::Account);
+        ErrorHappened(DBError::Account);
+        return false;
+
+    }
 }

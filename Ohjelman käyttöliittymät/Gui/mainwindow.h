@@ -7,12 +7,7 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-class MainView;
-class StartView;
-class WithdrawalView;
-class DepositView;
-class EventView;
-class SummaryView;
+#include <QStack>
 
 class DatabaseDLL;
 class RfidDLL;
@@ -23,55 +18,50 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 private:
-    DatabaseDLL* mDB;
-    RfidDLL* mRFID;
-    PinDLL* mPin;
+    DatabaseDLL* m_db;
+    RfidDLL* m_rfid;
+    PinDLL* m_pin;
 
-    MainView* mMainView;
-    StartView* mStartView;
-    WithdrawalView* mWithdrawalView;
-    DepositView* mDepositView;
-    EventView* mEventView;
-    SummaryView* mSummaryView;
-
-    QStack<QWidget*>* mPageHistory;
-    QString mCardNumber = "";
+    QStack<QWidget*> m_viewHistory;
+    QString m_cardNumber = "";
 
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-
 private slots:
-    void pinEntered(int pinCode);
-    void cardRead(QString cardNumber);
+    void onPinEntered(int pinCode);
+    void onCardRead(QString cardNumber);
     void readCard();
 
-    void setCurrentPage(QWidget* page);
-    void previousPage();
+    void setCurrentView(QWidget* view);
+    void previousView();
+
+    void onWithdrawal(float amount);
+    void onDeposit(float amount);
+
+    void toSummaryView();   
+    void toWithdrawalView();
+    void toEventView();
+    void toDepositView();
 
     // Logging and dialogs
     void logger(QString source, QString description);
     void displayError(QString message);
     void displayInfo(QString message);
 
-    void onWithdrawal(float amount);
-    void onDeposit(float amount);
-
-    void toSummaryView();
-
 private:
     Ui::MainWindow *ui;
 
     void showBalance(float balance);
-    void showPage(QWidget* page);
+    void showView(QWidget* view);
 
-    // DLL initializators
+    // DLL initializers
     void initRfid();
-    void initDB();
+    bool initDB();
     void initPin();
 
-    // View initializators
+    // View initializers
     void initWithdrawalView();
     void initDepositView();
     void initEventView();

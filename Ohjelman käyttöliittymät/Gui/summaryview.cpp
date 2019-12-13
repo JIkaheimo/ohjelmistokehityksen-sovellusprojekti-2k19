@@ -13,9 +13,9 @@ SummaryView::~SummaryView()
     delete ui;
 }
 
-void SummaryView::setEvents(QAbstractItemModel *events)
+void SummaryView::setEvents(QAbstractItemModel& events)
 {
-    ui->eventTable->setModel(events);
+    ui->eventTable->setModel(&events);
 }
 
 void SummaryView::setAccountNumber(QString accNumber)

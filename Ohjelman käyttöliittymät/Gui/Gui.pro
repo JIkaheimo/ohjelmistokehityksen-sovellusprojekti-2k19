@@ -22,6 +22,7 @@ SOURCES += \
     withdrawalview.cpp
 
 HEADERS += \
+    Constants.h \
     depositview.h \
     eventview.h \
     giftview.h \

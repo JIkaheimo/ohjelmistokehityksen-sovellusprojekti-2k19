@@ -7,18 +7,18 @@ class QSqlQueryModel;
 
 class Event : public Table
 {
-    public:
+public:
+    enum Type {
+        Deposit,
+        Withdrawal
+    };
+    Q_ENUM(Type)
 
-        enum Type {
-            WITHDARWAL,
-            DEPOSIT
-        };
+    Event(QSqlDatabase& db);
 
-        Event(QSqlDatabase& db);
-
-        bool addEvent(int accountId, Event::Type type, float amount);
-        QSqlQueryModel *getRecentEvents(int accountId, int num);
-        QSqlTableModel *getEvents(int accountId);
+    bool addEvent(int accountId, Event::Type type, float amount, float balance);
+    QSqlQueryModel *getRecentEvents(int accountId, int num);
+    QSqlTableModel *getEvents(int accountId);
 
 private:
         QSqlRecord selectItem(int eventId);

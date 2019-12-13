@@ -18,6 +18,7 @@ SOURCES += \
     table.cpp
 
 HEADERS += \
+    LibConstants.h \
     account.h \
     card.h \
     customer.h \

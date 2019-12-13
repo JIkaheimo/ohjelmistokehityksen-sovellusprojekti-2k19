@@ -16,7 +16,7 @@ public:
     explicit SummaryView(QWidget *parent = nullptr);
     ~SummaryView();
 
-    void setEvents(QAbstractItemModel* events);
+    void setEvents(QAbstractItemModel& events);
     void setAccountNumber(QString accNumber);
     void setOwner(QString owner);
 

@@ -4,10 +4,6 @@
 #include "table.h"
 
 #include <QObject>
-#include <QSqlRecord>
-
-class QSqlTableModel;
-class QSqlDatabase;
 
 class Account : public Table
 {

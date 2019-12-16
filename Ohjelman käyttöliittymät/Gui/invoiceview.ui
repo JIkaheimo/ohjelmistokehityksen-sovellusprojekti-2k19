@@ -127,7 +127,7 @@
      <item row="7" column="1">
       <widget class="QPushButton" name="btnAction">
        <property name="text">
-        <string>Maksa</string>
+        <string>Pay</string>
        </property>
       </widget>
      </item>

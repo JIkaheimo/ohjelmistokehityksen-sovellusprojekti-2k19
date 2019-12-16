@@ -13,7 +13,6 @@ class Account;
 class Invoice;
 class Customer;
 class QAbstractItemModel;
-class QAbstractTableModel;
 
 class DATABASEDLL_EXPORT DatabaseDLL  : public QObject
 {
@@ -51,9 +50,7 @@ public:
 
     QAbstractItemModel* DATABASEDLL_EXPORT getEvents();
     QAbstractItemModel* DATABASEDLL_EXPORT getRecentEvents(int number);
-
-    QAbstractTableModel* DATABASEDLL_EXPORT getOpenInvoices();
-
+    QAbstractItemModel* DATABASEDLL_EXPORT getOpenInvoices();
     QAbstractItemModel* DATABASEDLL_EXPORT getOtherAccounts();
 
 signals:

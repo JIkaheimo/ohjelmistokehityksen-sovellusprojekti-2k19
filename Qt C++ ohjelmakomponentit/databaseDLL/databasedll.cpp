@@ -9,7 +9,6 @@
 
 #include <QSqlQuery>
 #include <QAbstractItemModel>
-#include <QSqlTableModel>
 
 const bool IS_TEST_MODE = false;
 
@@ -201,9 +200,14 @@ bool DatabaseDLL::payInvoice(int invoiceId)
 
     float newBalance = getBalance() - invoiceAmount;
 
+    // Make sure balance cannot be negative.
     if (newBalance < 0)
+    {
+        emit Logger("Insufficient funds to pay the invoice.");
         return false;
+    }
 
+    // Update invoice
     m_invoice->setPaid(invoiceId);
 
     // Update account balances
@@ -211,7 +215,7 @@ bool DatabaseDLL::payInvoice(int invoiceId)
     m_account->setBalance(receiverId, receiverBalance + invoiceAmount);
 
     // Add events
-    m_event->addEvent(receiverId, Event::Invoice, invoiceAmount, m_account->getBalance(receiverId));
+    m_event->addEvent(receiverId, Event::Invoice, invoiceAmount, receiverBalance + invoiceAmount);
     m_event->addEvent(m_accountId, Event::Invoice, -invoiceAmount, newBalance);
 
     emit BalanceChanged(newBalance);
@@ -255,11 +259,11 @@ QAbstractItemModel* DatabaseDLL::getRecentEvents(int number)
 }
 
 
-QAbstractTableModel* DatabaseDLL::getOpenInvoices()
+QAbstractItemModel* DatabaseDLL::getOpenInvoices()
 {
     if (!checkLogin()) return nullptr;
 
-    QAbstractTableModel* openInvoices = m_invoice->getOpenInvoices(m_accountId);
+    QAbstractItemModel* openInvoices = m_invoice->getOpenInvoices(m_accountId);
 
     if (!openInvoices->rowCount())
         emit Logger("No open invoices available for the account.");

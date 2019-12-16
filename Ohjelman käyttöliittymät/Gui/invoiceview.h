@@ -25,11 +25,9 @@ public slots:
 private slots:
     void onInvoiceChanged(int index);
 
-
 signals:
     void PayInvoice(int invoiceId);
     void NoInvoices();
-
 
 private:
     Ui::InvoiceView *ui;

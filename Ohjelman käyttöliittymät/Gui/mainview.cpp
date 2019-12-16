@@ -36,8 +36,6 @@ MainView::MainView(QWidget *parent) :
         ui->btnToInvoices, &QPushButton::clicked,
         this, [this]{ emit ToInvoices(); }
     );
-
-    ui->btnToTransaction->hide();
 }
 
 MainView::~MainView()

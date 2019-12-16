@@ -51,7 +51,7 @@ int Invoice::getReceiver(int invoiceNumber)
 }
 
 
-QAbstractTableModel *Invoice::getOpenInvoices(int payerId)
+QAbstractItemModel* Invoice::getOpenInvoices(int payerId)
 {
     QSqlQueryModel* openInvoices = new QSqlQueryModel();
 

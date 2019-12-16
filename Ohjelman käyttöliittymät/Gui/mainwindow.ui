@@ -52,7 +52,7 @@ QPushButton#btnAction:enabled {
 font-weight: bold;
 }
 
-QDoubleSpinBox, QLineEdit, QSpinBox {
+QDoubleSpinBox, QLineEdit, QSpinBox, QComboBox, QDateEdit {
 	font-size: 20px;
 }
 
@@ -178,37 +178,10 @@ padding: 8px;
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <layout class="QGridLayout" name="gridLayout_4">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-         </layout>
         </widget>
-        <widget class="SummaryView" name="summaryView">
-         <layout class="QGridLayout" name="gridLayout_3">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-         </layout>
-        </widget>
+        <widget class="InvoiceView" name="invoiceView"/>
+        <widget class="TransactionView" name="transactionView"/>
+        <widget class="SummaryView" name="summaryView"/>
         <widget class="WithdrawalView" name="withdrawalView">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
@@ -216,69 +189,10 @@ padding: 8px;
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <layout class="QGridLayout" name="gridLayout_5">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-         </layout>
         </widget>
-        <widget class="DepositView" name="depositView">
-         <layout class="QGridLayout" name="gridLayout_9">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-         </layout>
-        </widget>
-        <widget class="EventView" name="eventView">
-         <layout class="QGridLayout" name="gridLayout">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-         </layout>
-        </widget>
-        <widget class="MainView" name="mainView">
-         <layout class="QGridLayout" name="gridLayout_8">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-         </layout>
-        </widget>
+        <widget class="DepositView" name="depositView"/>
+        <widget class="EventView" name="eventView"/>
+        <widget class="MainView" name="mainView"/>
        </widget>
       </item>
      </layout>
@@ -321,6 +235,18 @@ padding: 8px;
    <class>EventView</class>
    <extends>QWidget</extends>
    <header>eventview.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>InvoiceView</class>
+   <extends>QWidget</extends>
+   <header>invoiceview.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TransactionView</class>
+   <extends>QWidget</extends>
+   <header>transactionview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

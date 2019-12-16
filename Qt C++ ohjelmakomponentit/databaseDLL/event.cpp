@@ -4,15 +4,15 @@
 #include <QDebug>
 #include <QDateTime>
 
-const QString TABLE = "event";
-const QString ID = "id";
-const QString TYPE = "type";
-const QString TIME = "time";
-const QString AMOUNT = "amount";
-const QString BALANCE = "balance";
-const QString ACCOUNT_ID = "idAccount";
+const QString Event::TABLE = "event";
+const QString Event::ID = "id";
+const QString Event::TYPE = "type";
+const QString Event::TIME = "time";
+const QString Event::AMOUNT = "amount";
+const QString Event::BALANCE = "balance";
+const QString Event::ACCOUNT_ID = "idAccount";
 
-const QString TYPES[] = {"withdraw", "deposit"};
+const QString TYPES[] = {"withdrawal", "deposit", "invoice"};
 
 Event::Event(QSqlDatabase& db) :
     Table(db, TABLE)
@@ -49,9 +49,7 @@ QSqlQueryModel* Event::getRecentEvents(int accountId, int num)
             "ORDER BY %1 DESC "
             "LIMIT %8"
         )
-        .arg(TIME).arg(TYPE).arg(AMOUNT).arg(BALANCE).arg(TABLE)
-        .arg(ACCOUNT_ID).arg(accountId)
-        .arg(num);
+        .arg(TIME, TYPE, AMOUNT, BALANCE, TABLE, ACCOUNT_ID, QString::number(accountId), QString::number(num));
 
     recentEvents->setQuery(queryStr);
 
@@ -61,7 +59,7 @@ QSqlQueryModel* Event::getRecentEvents(int accountId, int num)
 
 QSqlTableModel *Event::getEvents(int accountId)
 {
-    mModel->setFilter(QString("%1 = %2").arg(ACCOUNT_ID).arg(accountId));
+    mModel->setFilter(QString("%1 = %2").arg(ACCOUNT_ID, QString::number(accountId)));
     mModel->select();
     return mModel;
 }

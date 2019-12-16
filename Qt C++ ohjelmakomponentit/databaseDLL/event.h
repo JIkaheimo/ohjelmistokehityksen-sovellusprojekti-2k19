@@ -8,9 +8,19 @@ class QSqlQueryModel;
 class Event : public Table
 {
 public:
+
+    static const QString TABLE;
+    static const QString ID;
+    static const QString TYPE;
+    static const QString TIME;
+    static const QString AMOUNT;
+    static const QString BALANCE;
+    static const QString ACCOUNT_ID;
+
     enum Type {
         Withdrawal,
-        Deposit
+        Deposit,
+        Invoice
     };
     Q_ENUM(Type)
 
@@ -21,7 +31,7 @@ public:
     QSqlTableModel *getEvents(int accountId);
 
 private:
-        QSqlRecord selectItem(int eventId);
+    QSqlRecord selectItem(int eventId);
 };
 
 #endif // EVENT_H

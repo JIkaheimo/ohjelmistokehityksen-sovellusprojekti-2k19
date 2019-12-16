@@ -20,6 +20,8 @@ signals:
     void ToEvents();
     void ToDeposit();
     void ToSummary();
+    void ToTransaction();
+    void ToInvoices();
 
 private:
     Ui::MainView *ui;

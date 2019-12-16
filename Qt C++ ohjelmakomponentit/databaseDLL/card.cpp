@@ -2,12 +2,11 @@
 
 #include <QSqlTableModel>
 
-const QString TABLE = "card";
-const QString ID = "id";
-const QString NUMBER = "identifier";
-const QString PIN = "pin";
-const QString ACCOUNT_ID = "idAccount";
-
+const QString Card::TABLE = "card";
+const QString Card::ID = "id";
+const QString Card::NUMBER = "identifier";
+const QString Card::PIN = "pin";
+const QString Card::ACCOUNT_ID = "idAccount";
 
 Card::Card(QSqlDatabase& db) :
     Table(db, TABLE)
@@ -16,7 +15,7 @@ Card::Card(QSqlDatabase& db) :
 
 QSqlRecord Card::selectItem(int cardId)
 {
-    mModel->setFilter(QString("%1 = %2").arg(ID).arg(cardId));
+    mModel->setFilter(QString("%1 = %2").arg(ID, QString::number(cardId)));
     mModel->select();
     return mModel->record(0);
 }
@@ -24,17 +23,12 @@ QSqlRecord Card::selectItem(int cardId)
 int Card::validate(QString cardNumber, int cardPin)
 {
     mModel->setFilter(QString("%1 = '%2' AND %3 = %4")
-      .arg(NUMBER)
-      .arg(cardNumber)
-      .arg(PIN)
-      .arg(cardPin));
+      .arg(NUMBER, cardNumber, PIN, QString::number(cardPin)));
 
     mModel->select();
 
     if (mModel->rowCount() == 1)
-    {
         return mModel->record(0).value(ACCOUNT_ID).toInt();
-    }
 
     return -1;
 }

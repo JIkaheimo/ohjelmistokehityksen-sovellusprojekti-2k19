@@ -26,6 +26,18 @@ MainView::MainView(QWidget *parent) :
         ui->btnToSummary, &QPushButton::clicked,
         this, [this]{ emit ToSummary(); }
     );
+
+    connect(
+        ui->btnToTransaction, &QPushButton::clicked,
+        this, [this]{ emit ToTransaction(); }
+    );
+
+    connect(
+        ui->btnToInvoices, &QPushButton::clicked,
+        this, [this]{ emit ToInvoices(); }
+    );
+
+    ui->btnToTransaction->hide();
 }
 
 MainView::~MainView()

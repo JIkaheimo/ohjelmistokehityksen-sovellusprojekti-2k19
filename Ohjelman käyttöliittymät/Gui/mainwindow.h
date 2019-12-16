@@ -30,20 +30,28 @@ public:
     ~MainWindow();
 
 private slots:
+
+    // RFID & Pin
     void onPinEntered(int pinCode);
     void onCardRead(QString cardNumber);
     void readCard();
 
-    void setCurrentView(QWidget* view);
-    void previousView();
-
+    // Account events
     void onWithdrawal(float amount);
     void onDeposit(float amount);
+    void onTransaction(int receiverId, float amount);
+    void onPayInvoice(int invoiceId);
 
+    // View navigation
     void toSummaryView();   
     void toWithdrawalView();
     void toEventView();
     void toDepositView();
+    void toTransactionView();
+    void toInvoiceView();
+
+    void setCurrentView(QWidget* view);
+    void previousView();
 
     // Logging and dialogs
     void logger(QString source, QString description);
@@ -67,6 +75,7 @@ private:
     void initEventView();
     void initMainView();
     void initStartView();
-
+    void initTransactionView();
+    void initInvoicesView();
 };
 #endif // MAINWINDOW_H

@@ -2,6 +2,7 @@
 #include "account.h"
 #include "customer.h"
 #include "event.h"
+#include "invoice.h"
 
 #include "databasedll.h"
 #include "LibConstants.h"
@@ -9,6 +10,8 @@
 #include <QSqlQuery>
 #include <QAbstractItemModel>
 #include <QSqlTableModel>
+
+const bool IS_TEST_MODE = false;
 
 
 DatabaseDLL::DatabaseDLL()
@@ -36,6 +39,8 @@ DatabaseDLL::~DatabaseDLL()
     delete m_customer;
     m_customer = nullptr;
 
+    delete m_invoice;
+    m_invoice = nullptr;
 }
 
 
@@ -48,17 +53,22 @@ bool DatabaseDLL::init()
   * false otherwise
   */
 {
-    m_db.setHostName(Config::Host);
-    m_db.setUserName(Config::User);
-    m_db.setPassword(Config::Password);
-    m_db.setDatabaseName(Config::Database);
+    m_db.setHostName(IS_TEST_MODE ? Config::TestHost : Config::Host);
+    m_db.setUserName(IS_TEST_MODE ? Config::TestUser : Config::User);
+    m_db.setPassword(IS_TEST_MODE ? Config::TestPassword : Config::Password);
+    m_db.setDatabaseName(IS_TEST_MODE ? Config::TestDatabase : Config::Database);
+
+    emit Logger(DBMessage::Init);
 
     if (m_db.open())
     {
+        emit Logger(DBMessage::Open);
+
         m_account = new Account(m_db);
         m_card = new Card(m_db);
         m_event = new Event(m_db);
         m_customer = new Customer(m_db);
+        m_invoice = new Invoice(m_db);
 
         emit Logger(DBSuccess::Connection);
 
@@ -79,6 +89,7 @@ bool DatabaseDLL::login(QString cardNumber, int pin)
  * login(cardNumber, pin)
  */
 {
+    emit Logger(QString(DBMessage::Auth).arg(cardNumber).arg(pin));
     int accountId = m_card->validate(cardNumber, pin);
 
     if (accountId > 0)
@@ -169,9 +180,44 @@ bool DatabaseDLL::withdraw(float amount)
 }
 
 
-bool DatabaseDLL::transaction(int receiverId, float amount)
+bool DatabaseDLL::transfer(int receiverId, float amount)
 {
     // PLACEHOLDER
+    return true;
+}
+
+
+bool DatabaseDLL::payInvoice(int invoiceId)
+{
+    emit Logger("Paying invoice ID: " + QString::number(invoiceId));
+
+    // Get any necessary data.
+    QSqlRecord invoice = m_invoice->getInvoice(invoiceId);
+
+    float invoiceAmount = Invoice::getAmount(invoice);
+    int receiverId = Invoice::getReceiver(invoice);
+
+    float receiverBalance = m_account->getBalance(receiverId);
+
+    float newBalance = getBalance() - invoiceAmount;
+
+    if (newBalance < 0)
+        return false;
+
+    m_invoice->setPaid(invoiceId);
+
+    // Update account balances
+    m_account->setBalance(m_accountId, newBalance);
+    m_account->setBalance(receiverId, receiverBalance + invoiceAmount);
+
+    // Add events
+    m_event->addEvent(receiverId, Event::Invoice, invoiceAmount, m_account->getBalance(receiverId));
+    m_event->addEvent(m_accountId, Event::Invoice, -invoiceAmount, newBalance);
+
+    emit BalanceChanged(newBalance);
+
+    emit Logger("Invoice succesfully paid.");
+
     return true;
 }
 
@@ -206,6 +252,19 @@ QAbstractItemModel* DatabaseDLL::getRecentEvents(int number)
         emit Logger("No recent events available for account.");
 
     return recentEvents;
+}
+
+
+QAbstractTableModel* DatabaseDLL::getOpenInvoices()
+{
+    if (!checkLogin()) return nullptr;
+
+    QAbstractTableModel* openInvoices = m_invoice->getOpenInvoices(m_accountId);
+
+    if (!openInvoices->rowCount())
+        emit Logger("No open invoices available for the account.");
+
+    return openInvoices;
 }
 
 

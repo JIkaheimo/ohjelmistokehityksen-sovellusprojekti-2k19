@@ -8,7 +8,7 @@
 
 ## Työnjako
 
-* Simo Laskutus (invoices)
+* Simo - Laskutus (invoices)
 * Konsta - Rfid ja käyttöliittymä yleisesti
 * Toni - Lahjoitukset ja tilisiirrot
 * Jaakko - Käyttöliittymä, PIN-koodi ja tietokanta + konfigurointi

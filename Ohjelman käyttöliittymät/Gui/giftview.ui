@@ -7,24 +7,63 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>310</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QLabel" name="label">
+  <widget class="QSplitter" name="splitter">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>70</y>
-     <width>141</width>
-     <height>18</height>
+     <x>90</x>
+     <y>50</y>
+     <width>211</width>
+     <height>181</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Select gifted amount:</string>
+   <property name="orientation">
+    <enum>Qt::Vertical</enum>
    </property>
+   <widget class="QLabel" name="label">
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Select gifted amount:</string>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="doubleSpinBox">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Enter account number:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit"/>
+   <widget class="QPushButton" name="confirmButton">
+    <property name="text">
+     <string>Confirm</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>

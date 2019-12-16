@@ -3,7 +3,7 @@
 
 #include "table.h"
 
-class QSqlQueryModel;
+class QAbstractItemModel;
 
 class Event : public Table
 {
@@ -19,15 +19,16 @@ public:
 
     enum Type {
         Withdrawal,
-        Deposit
+        Deposit,
+        Invoice
     };
     Q_ENUM(Type)
 
     Event(QSqlDatabase& db);
 
     bool addEvent(int accountId, Event::Type type, float amount, float balance);
-    QSqlQueryModel *getRecentEvents(int accountId, int num);
-    QSqlTableModel *getEvents(int accountId);
+    QAbstractItemModel* getRecentEvents(int accountId, int num);
+    QAbstractItemModel* getEvents(int accountId);
 
 private:
     QSqlRecord selectItem(int eventId);

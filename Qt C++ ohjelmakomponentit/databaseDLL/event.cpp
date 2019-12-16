@@ -14,6 +14,7 @@ const QString Event::ACCOUNT_ID = "idAccount";
 
 const QString TYPES[] = {"withdrawal", "deposit", "invoice"};
 
+
 Event::Event(QSqlDatabase& db) :
     Table(db, TABLE)
 {
@@ -38,9 +39,9 @@ bool Event::addEvent(int accountId, Event::Type type, float amount, float balanc
 }
 
 
-QSqlQueryModel* Event::getRecentEvents(int accountId, int num)
+QAbstractItemModel* Event::getRecentEvents(int accountId, int num)
 {
-    QSqlQueryModel* recentEvents = new QSqlQueryModel();
+    QSqlQueryModel* recentEvents = new QSqlQueryModel(this);
 
     QString queryStr =
         QString(
@@ -57,7 +58,7 @@ QSqlQueryModel* Event::getRecentEvents(int accountId, int num)
 }
 
 
-QSqlTableModel *Event::getEvents(int accountId)
+QAbstractItemModel* Event::getEvents(int accountId)
 {
     mModel->setFilter(QString("%1 = %2").arg(ACCOUNT_ID, QString::number(accountId)));
     mModel->select();

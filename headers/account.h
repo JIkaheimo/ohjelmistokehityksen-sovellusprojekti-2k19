@@ -5,6 +5,8 @@
 
 #include <QObject>
 
+class QAbstractItemModel;
+
 class Account : public Table
 {
 public:
@@ -23,7 +25,7 @@ public:
     QString getNumber(int accountId);
     int getCustomerId(int accountId);
 
-    QSqlTableModel* getOthers(int accountId);
+    QAbstractItemModel* getOthers(int accountId);
 
 private:
     QSqlRecord selectItem(int id) override;

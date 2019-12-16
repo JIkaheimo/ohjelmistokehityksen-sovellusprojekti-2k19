@@ -3,7 +3,7 @@
 
 #include "table.h"
 
-class QAbstractTableModel;
+class QAbstractItemModel;
 
 class Invoice : Table
 {
@@ -11,13 +11,20 @@ public:
    Invoice(QSqlDatabase &db);
 
    bool setPaid(int invoiceNumber);
+
+   QSqlRecord getInvoice(int invoiceNumber);
    float getAmount(int invoiceNumber);
    int getReceiver(int invoiceNumber);
 
    // Table interface
-   QAbstractTableModel* getOpenInvoices(int payerId);
+   QAbstractItemModel* getOpenInvoices(int payerId);
+
+   static float getAmount(QSqlRecord& invoice);
+   static int getReceiver(QSqlRecord& invoice);
+
 private:
     QSqlRecord selectItem(int id);
+
 };
 
 #endif // INVOICE_H

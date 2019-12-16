@@ -3,7 +3,7 @@
 
 #include "table.h"
 
-class QAbstractTableModel;
+class QAbstractItemModel;
 
 class Invoice : Table
 {
@@ -17,7 +17,7 @@ public:
    int getReceiver(int invoiceNumber);
 
    // Table interface
-   QAbstractTableModel* getOpenInvoices(int payerId);
+   QAbstractItemModel* getOpenInvoices(int payerId);
 
    static float getAmount(QSqlRecord& invoice);
    static int getReceiver(QSqlRecord& invoice);

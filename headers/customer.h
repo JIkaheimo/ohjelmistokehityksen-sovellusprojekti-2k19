@@ -17,8 +17,11 @@ public:
 
     QString getName(int customerId);
     // Table interface
+
+
 private:
     QSqlRecord selectItem(int id);
+
 };
 
 #endif // CUSTOMER_H

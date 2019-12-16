@@ -5,12 +5,11 @@
 #include <QString>
 #include <QSqlRecord>
 
-const QString TABLE = "account";
-const QString ID = "id";
-const QString NUMBER = "number";
-const QString BALANCE = "balance";
-const QString CUSTOMER_ID = "idCustomer";
-
+const QString Account::TABLE = "account";
+const QString Account::ID = "id";
+const QString Account::CUSTOMER_ID = "idCustomer";
+const QString Account::NUMBER = "number";
+const QString Account::BALANCE = "balance";
 
 Account::Account(QSqlDatabase& db) :
     Table(db, TABLE)

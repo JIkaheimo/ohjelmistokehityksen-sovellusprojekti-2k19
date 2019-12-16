@@ -13,6 +13,11 @@ class Card : public Table
 {
 
 public:
+    static const QString TABLE;
+    static const QString ID;
+    static const QString NUMBER;
+    static const QString PIN;
+    static const QString ACCOUNT_ID;
 
     Card(QSqlDatabase& db);
 

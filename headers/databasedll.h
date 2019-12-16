@@ -10,8 +10,10 @@
 
 class Card;
 class Account;
+class Invoice;
 class Customer;
 class QAbstractItemModel;
+class QAbstractTableModel;
 
 class DATABASEDLL_EXPORT DatabaseDLL  : public QObject
 {
@@ -23,6 +25,7 @@ private:
     int m_accountId = -1;
 
     Customer* m_customer;
+    Invoice* m_invoice;
     Account* m_account;
     Card* m_card;
     Event* m_event;
@@ -43,10 +46,14 @@ public:
 
     bool DATABASEDLL_EXPORT deposit(float amount);
     bool DATABASEDLL_EXPORT withdraw(float amount);
-    bool DATABASEDLL_EXPORT transaction(int receiverId, float amount);
+    bool DATABASEDLL_EXPORT transfer(int receiverId, float amount);
+    bool DATABASEDLL_EXPORT payInvoice(int invoiceId);
 
     QAbstractItemModel* DATABASEDLL_EXPORT getEvents();
     QAbstractItemModel* DATABASEDLL_EXPORT getRecentEvents(int number);
+
+    QAbstractTableModel* DATABASEDLL_EXPORT getOpenInvoices();
+
     QAbstractItemModel* DATABASEDLL_EXPORT getOtherAccounts();
 
 signals:

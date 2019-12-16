@@ -4,6 +4,11 @@
 #include <QString>
 
 namespace Config {
+    const QString TestHost = "localhost";
+    const QString TestUser = "root";
+    const QString TestPassword = "";
+    const QString TestDatabase = "opisk_c8ikja00";
+
     const QString Host = "mysli.oamk.fi";
     const QString User = "c8ikja00";
     const QString Password = "8uL4khDtm2H6H7ag";
@@ -21,6 +26,12 @@ namespace DBError {
 namespace DBSuccess {
     const QString Connection = "Succesfully connected to database.";
     const QString Auth = "Login successful for account with id %1.";
+}
+
+namespace DBMessage {
+    const QString Init = "Connecting to database...";
+    const QString Open = "Connection opened to database.";
+    const QString Auth = "Logging in with card %1 and PIN %2";
 }
 
 

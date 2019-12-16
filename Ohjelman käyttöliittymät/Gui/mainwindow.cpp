@@ -34,16 +34,22 @@ MainWindow::MainWindow(QWidget *parent):
     initMainView();
     initWithdrawalView();
     initDepositView();
+    initTransactionView();
+    initInvoicesView();
 
     showView(ui->startView);
 
     show();
 
-    // Library initialization
+    // Library initializations
 
     initPin();
     initRfid();
-    initDB();
+
+    if (!initDB())
+    {
+        ui->startView->setEnabled(false);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -118,6 +124,8 @@ void MainWindow::initMainView()
   * Initializes MainView with any required connections.
   */
 {
+    // Connect navigation to different views from the main view.
+
     connect(ui->mainView, &MainView::ToSummary,
             this, &MainWindow::toSummaryView);
 
@@ -129,6 +137,12 @@ void MainWindow::initMainView()
 
     connect(ui->mainView, &MainView::ToDeposit,
             this, &MainWindow::toDepositView);
+
+    connect(ui->mainView, &MainView::ToTransaction,
+            this, &MainWindow::toTransactionView);
+
+    connect(ui->mainView, &MainView::ToInvoices,
+            this, &MainWindow::toInvoiceView);
 }
 
 
@@ -142,6 +156,26 @@ void MainWindow::initStartView()
 
     connect(ui->startView, &StartView::TestLogin,
             this, [=]{ onCardRead(Default::Card); });
+}
+
+
+void MainWindow::initTransactionView()
+{
+    connect(ui->transactionView, &TransactionView::Transfer,
+            this, &MainWindow::onTransaction);
+}
+
+
+void MainWindow::initInvoicesView()
+{
+    connect(ui->invoiceView, &InvoiceView::PayInvoice,
+            this, &MainWindow::onPayInvoice);
+
+    connect(ui->invoiceView, &InvoiceView::NoInvoices,
+            this, [this]{
+                displayInfo("No invoices available.");
+                previousView();
+            });
 }
 
 
@@ -224,6 +258,27 @@ void MainWindow::onDeposit(float amount)
 }
 
 
+void MainWindow::onTransaction(int receiverId, float amount)
+{
+    if (m_db->transfer(receiverId, amount))
+        displayInfo(BSMessage::Transfer);
+    else
+        displayError(BSError::Transfer);
+}
+
+
+void MainWindow::onPayInvoice(int invoiceId)
+{
+    if (m_db->payInvoice(invoiceId))
+    {
+        displayInfo(BSMessage::Invoice);
+        ui->invoiceView->setInvoices(*m_db->getOpenInvoices());
+    }
+    else
+        displayError(BSError::Invoice);
+}
+
+
 void MainWindow::onWithdrawal(float amount)
 {
     if (m_db->withdraw(amount))
@@ -270,6 +325,18 @@ void MainWindow::toEventView()
 void MainWindow::toDepositView()
 {
     setCurrentView(ui->depositView);
+}
+
+
+void MainWindow::toTransactionView()
+{
+    setCurrentView(ui->transactionView);
+}
+
+void MainWindow::toInvoiceView()
+{
+    setCurrentView(ui->invoiceView);
+    ui->invoiceView->setInvoices(*m_db->getOpenInvoices());
 }
 
 

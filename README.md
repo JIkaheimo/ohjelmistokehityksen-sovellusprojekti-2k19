@@ -1,5 +1,6 @@
 # ohjelmistokehityksen-sovellusprojekti-2k19
 
+`Viimeisimpien bonus-featureiden dokumentointi jäi osittain kesken...`
 
 ## Linkit
 * [Arvioinnit](https://github.com/JIkaheimo/ohjelmistokehityksen-sovellusprojekti-2k19/tree/master/Loppuraportti)

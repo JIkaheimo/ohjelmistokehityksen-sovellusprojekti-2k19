@@ -17,7 +17,7 @@ namespace Logger {
 namespace BSError {
     const QString Withdrawal = "Account doesn't have enough funds for the withdrawal.";
     const QString PinTimeout = "Please input your pin code within 10 seconds.";
-    const QString Deposit = "Could not add money to the account, please take it from the dispenser";
+    const QString Deposit = "Could not transfer funds to account, please take them from the dispenser";
     const QString Transfer ="Could not transfer the money.";
     const QString Invoice = "Could not pay the invoice.";
 }

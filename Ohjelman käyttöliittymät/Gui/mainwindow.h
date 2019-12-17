@@ -32,36 +32,37 @@ public:
 private slots:
 
     // RFID & Pin
-    void onPinEntered(int pinCode);
-    void onCardRead(QString cardNumber);
+    void onPinEntered(const int pinCode);
+    void onCardRead(const QString& cardNumber);
     void readCard();
 
     // Account events
-    void onWithdrawal(float amount);
-    void onDeposit(float amount);
-    void onTransaction(int receiverId, float amount);
-    void onPayInvoice(int invoiceId);
+    void onWithdrawal(const float amount);
+    void onDeposit(const float amount);
+    void onTransfer(const QString IBAN, const float amount);
+    void onPayInvoice(const int invoiceNumber);
 
     // View navigation
     void toSummaryView();   
     void toWithdrawalView();
     void toEventView();
     void toDepositView();
-    void toTransactionView();
+    void toGiftView();
     void toInvoiceView();
 
     void setCurrentView(QWidget* view);
     void previousView();
 
     // Logging and dialogs
-    void logger(QString source, QString description);
-    void displayError(QString message);
-    void displayInfo(QString message);
+    void logger(const QString& source, const QString& description);
+    void displayError(const QString& message);
+    void displayInfo(const QString& message);
 
+    void logout();
 private:
     Ui::MainWindow *ui;
 
-    void showBalance(float balance);
+    void showBalance(const float balance);
     void showView(QWidget* view);
 
     // DLL initializers
@@ -75,7 +76,7 @@ private:
     void initEventView();
     void initMainView();
     void initStartView();
-    void initTransactionView();
+    void initGiftView();
     void initInvoicesView();
 };
 #endif // MAINWINDOW_H

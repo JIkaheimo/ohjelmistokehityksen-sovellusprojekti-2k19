@@ -48,7 +48,7 @@ bool DatabaseDLL::init()
   * Initializes the connection to database.
   *
   * Returns:
-  * true if the connection was successful,
+  * true if the connection was successfully established,
   * false otherwise
   */
 {
@@ -63,11 +63,11 @@ bool DatabaseDLL::init()
     {
         emit Logger(DBMessage::Open);
 
-        m_account = new Account(m_db);
-        m_card = new Card(m_db);
-        m_event = new Event(m_db);
-        m_customer = new Customer(m_db);
-        m_invoice = new Invoice(m_db);
+        m_account = new Account();
+        m_card = new Card();
+        m_event = new Event();
+        m_customer = new Customer();
+        m_invoice = new Invoice();
 
         emit Logger(DBSuccess::Connection);
 
@@ -88,15 +88,16 @@ bool DatabaseDLL::login(QString cardNumber, int pin)
  * login(cardNumber, pin)
  */
 {
-    emit Logger(QString(DBMessage::Auth).arg(cardNumber).arg(pin));
-    int accountId = m_card->validate(cardNumber, pin);
+    emit Logger(QString(DBMessage::Auth).arg(cardNumber, QString::number(pin)));
 
-    if (accountId > 0)
+    QString accountIBAN = m_card->validate(cardNumber, pin);
+
+    if (!accountIBAN.isEmpty())
     {
-        m_accountId = accountId;
+        m_accountIBAN = accountIBAN;
 
-        emit Logger(QString(DBSuccess::Auth).arg(m_accountId));
-        emit BalanceChanged(m_account->getBalance(m_accountId));
+        emit Logger(QString(DBSuccess::Auth).arg(m_accountIBAN));
+        emit BalanceChanged(m_account->getBalance(m_accountIBAN));
 
         return true;
     }
@@ -112,13 +113,15 @@ bool DatabaseDLL::login(QString cardNumber, int pin)
 
 bool DatabaseDLL::isLoggedIn()
 {
-    return m_accountId != -1;
+    return !m_accountIBAN.isEmpty();
 }
 
 
 void DatabaseDLL::logout()
 {
-    m_accountId = -1;
+    m_accountIBAN = "";
+    emit BalanceChanged(0);
+    emit Logout();
 }
 
 
@@ -126,7 +129,7 @@ float DatabaseDLL::getBalance()
 {
     if (!checkLogin()) return -1;
 
-    return m_account->getBalance(m_accountId);
+    return m_account->getBalance(m_accountIBAN);
 }
 
 
@@ -134,7 +137,8 @@ QString DatabaseDLL::getAccountOwner()
 {
     if (!checkLogin()) return "";
 
-    int customerId = m_account->getCustomerId(m_accountId);
+    int customerId = m_account->getCustomerId(m_accountIBAN);
+
     return m_customer->getName(customerId);
 }
 
@@ -143,12 +147,13 @@ QString DatabaseDLL::getAccountNumber()
 {
     if (!checkLogin()) return "";
 
-    return m_account->getNumber(m_accountId);
+    return m_accountIBAN;
 }
 
 
 bool DatabaseDLL::deposit(float amount)
 {
+
     if (amount > 0 && checkLogin() && addToBalance(amount))
     {
         float newBalance = getBalance();
@@ -179,9 +184,29 @@ bool DatabaseDLL::withdraw(float amount)
 }
 
 
-bool DatabaseDLL::transfer(int receiverId, float amount)
+bool DatabaseDLL::transfer(QString IBAN, float amount)
 {
-    // PLACEHOLDER
+    float receiverBalance = m_account->getBalance(IBAN);
+
+    float newBalance = getBalance() - amount;
+
+    // Make sure balance cannot be negative.
+    if (newBalance < 0)
+    {
+        emit Logger("Insufficient funds to transfer.");
+        return false;
+    }
+
+    // Update account balances
+    m_account->setBalance(m_accountIBAN, newBalance);
+    m_account->setBalance(IBAN, receiverBalance + amount);
+
+    // Add events
+    m_event->addEvent(IBAN, Event::Gift, amount, receiverBalance + amount);
+    m_event->addEvent(m_accountIBAN, Event::Gift, -amount, newBalance);
+
+    emit BalanceChanged(newBalance);
+
     return true;
 }
 
@@ -194,11 +219,12 @@ bool DatabaseDLL::payInvoice(int invoiceId)
     QSqlRecord invoice = m_invoice->getInvoice(invoiceId);
 
     float invoiceAmount = Invoice::getAmount(invoice);
-    int receiverId = Invoice::getReceiver(invoice);
+    QString receiverIBAN = Invoice::getReceiver(invoice);
 
-    float receiverBalance = m_account->getBalance(receiverId);
+    float receiverBalance = m_account->getBalance(receiverIBAN);
 
-    float newBalance = getBalance() - invoiceAmount;
+    float newBalance = m_account->getBalance(m_accountIBAN) - invoiceAmount;
+    emit Logger(QString::number(newBalance));
 
     // Make sure balance cannot be negative.
     if (newBalance < 0)
@@ -211,12 +237,12 @@ bool DatabaseDLL::payInvoice(int invoiceId)
     m_invoice->setPaid(invoiceId);
 
     // Update account balances
-    m_account->setBalance(m_accountId, newBalance);
-    m_account->setBalance(receiverId, receiverBalance + invoiceAmount);
+    m_account->setBalance(m_accountIBAN, newBalance);
+    m_account->setBalance(receiverIBAN, receiverBalance + invoiceAmount);
 
     // Add events
-    m_event->addEvent(receiverId, Event::Invoice, invoiceAmount, receiverBalance + invoiceAmount);
-    m_event->addEvent(m_accountId, Event::Invoice, -invoiceAmount, newBalance);
+    m_event->addEvent(receiverIBAN, Event::Invoice, invoiceAmount, receiverBalance + invoiceAmount);
+    m_event->addEvent(m_accountIBAN, Event::Invoice, -invoiceAmount, newBalance);
 
     emit BalanceChanged(newBalance);
 
@@ -228,32 +254,48 @@ bool DatabaseDLL::payInvoice(int invoiceId)
 
 void DatabaseDLL::addEvent(Event::Type evtType, float amount, float balance)
 {
-    if (!m_event->addEvent(m_accountId, evtType, amount, balance))
+    if (!m_event->addEvent(m_accountIBAN, evtType, amount, balance))
         emit Logger("Could not add event to database.");
 }
 
 
 QAbstractItemModel* DatabaseDLL::getEvents()
+/**
+  * Returns a model of the account's events.
+  *
+  * Returns:
+  * events (QAbstractItemModel*) as a model.
+  */
 {
     if (!checkLogin()) return nullptr;
 
-    QAbstractItemModel* events = m_event->getEvents(m_accountId);
+    QAbstractItemModel* events = m_event->getEvents(m_accountIBAN);
 
     if (!events->rowCount())
-        emit Logger("No events available for account.");
+        emit Logger("No events available for account " + m_accountIBAN);
 
     return events;
 }
 
 
 QAbstractItemModel* DatabaseDLL::getRecentEvents(int number)
+/**
+  * Returns a model of the account's recent events.
+  *
+  * Params:
+  * number (int) of events being returned.
+  *
+  * Returns:
+  * recentEvents (QAbstractItemModel*) as a model.
+  *
+  */
 {
     if (!checkLogin()) return nullptr;
 
-    QAbstractItemModel* recentEvents = m_event->getRecentEvents(m_accountId, number);
+    QAbstractItemModel* recentEvents = m_event->getRecentEvents(m_accountIBAN, number);
 
     if (!recentEvents->rowCount())
-        emit Logger("No recent events available for account.");
+        emit Logger("No recent events available for account " + m_accountIBAN);
 
     return recentEvents;
 }
@@ -263,7 +305,7 @@ QAbstractItemModel* DatabaseDLL::getOpenInvoices()
 {
     if (!checkLogin()) return nullptr;
 
-    QAbstractItemModel* openInvoices = m_invoice->getOpenInvoices(m_accountId);
+    QAbstractItemModel* openInvoices = m_invoice->getOpenInvoices(m_accountIBAN);
 
     if (!openInvoices->rowCount())
         emit Logger("No open invoices available for the account.");
@@ -276,7 +318,7 @@ QAbstractItemModel *DatabaseDLL::getOtherAccounts()
 {
     if (!checkLogin()) return nullptr;
 
-    QAbstractItemModel* otherAccounts = m_account->getOthers(m_accountId);
+    QAbstractItemModel* otherAccounts = m_account->getOtherAccounts(m_accountIBAN);
 
     if (!otherAccounts->rowCount())
         emit Logger("No other accounts available.");
@@ -293,7 +335,7 @@ bool DatabaseDLL::addToBalance(float amount)
     if (newBalance < 0)
         return false;
 
-    return m_account->setBalance(m_accountId, newBalance);
+    return m_account->setBalance(m_accountIBAN, newBalance);
 }
 
 

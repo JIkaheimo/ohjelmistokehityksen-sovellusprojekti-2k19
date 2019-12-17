@@ -21,7 +21,7 @@ class DATABASEDLL_EXPORT DatabaseDLL  : public QObject
 private:
     QSqlDatabase m_db;
 
-    int m_accountId = -1;
+    QString m_accountIBAN = "";
 
     Customer* m_customer;
     Invoice* m_invoice;
@@ -45,7 +45,7 @@ public:
 
     bool DATABASEDLL_EXPORT deposit(float amount);
     bool DATABASEDLL_EXPORT withdraw(float amount);
-    bool DATABASEDLL_EXPORT transfer(int receiverId, float amount);
+    bool DATABASEDLL_EXPORT transfer(QString receiverIBAN, float amount);
     bool DATABASEDLL_EXPORT payInvoice(int invoiceId);
 
     QAbstractItemModel* DATABASEDLL_EXPORT getEvents();
@@ -55,6 +55,7 @@ public:
 
 signals:
     void DATABASEDLL_EXPORT BalanceChanged(float newBalance);
+    void DATABASEDLL_EXPORT Logout();
     void DATABASEDLL_EXPORT ErrorHappened(QString description);
     void DATABASEDLL_EXPORT Logger(QString message);
 

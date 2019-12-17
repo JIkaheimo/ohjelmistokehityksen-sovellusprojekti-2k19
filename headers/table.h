@@ -15,11 +15,8 @@ public:
     ~Table();
 
 protected:
-    QSqlTableModel* mModel;
-    int mLastId = -1;
+    QSqlTableModel* m_model;
 
-private:
-    virtual QSqlRecord selectItem(int id)=0;
 
 };
 

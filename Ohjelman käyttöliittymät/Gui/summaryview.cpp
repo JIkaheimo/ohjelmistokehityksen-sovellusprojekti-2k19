@@ -10,20 +10,32 @@ SummaryView::SummaryView(QWidget *parent) :
 
 SummaryView::~SummaryView()
 {
+    delete ui->eventTable->model();
     delete ui;
 }
+
 
 void SummaryView::setEvents(QAbstractItemModel& events)
 {
     ui->eventTable->setModel(&events);
 }
 
-void SummaryView::setAccountNumber(QString accNumber)
+
+void SummaryView::setAccountNumber(const QString& accNumber)
 {
     ui->numberText->setText(accNumber);
 }
 
-void SummaryView::setOwner(QString owner)
+
+void SummaryView::setOwner(const QString& owner)
 {
     ui->ownerText->setText(owner);
+}
+
+
+void SummaryView::clear()
+{
+    delete ui->eventTable->model();
+    ui->numberText->clear();
+    ui->ownerText->clear();
 }

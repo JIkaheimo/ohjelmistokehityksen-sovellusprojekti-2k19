@@ -21,9 +21,12 @@ public:
 public slots:
     void setInvoices(QAbstractItemModel &invoices);
     void removeInvoice();
+    void clear();
+    void setLimit(float amount);
 
 private slots:
     void onInvoiceChanged(int index);
+    void onPayInvoice();
 
 signals:
     void PayInvoice(int invoiceId);
@@ -31,8 +34,10 @@ signals:
 
 private:
     Ui::InvoiceView *ui;
-    QDataWidgetMapper *invoiceMapper;
-    QAbstractItemModel *invoiceModel;
+    float m_payLimit = 0;
+    QDataWidgetMapper *invoiceMapper = nullptr;
+    QAbstractItemModel *invoiceModel = nullptr;
+    void updateButton();
 };
 
 #endif // INVOICEVIEW_H

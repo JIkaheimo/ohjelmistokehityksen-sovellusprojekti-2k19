@@ -16,9 +16,12 @@ public:
     explicit SummaryView(QWidget *parent = nullptr);
     ~SummaryView();
 
+public slots:
+    void clear();
     void setEvents(QAbstractItemModel& events);
-    void setAccountNumber(QString accNumber);
-    void setOwner(QString owner);
+    void setAccountNumber(const QString& accNumber);
+    void setOwner(const QString& owner);
+
 
 private:
     Ui::SummaryView *ui;

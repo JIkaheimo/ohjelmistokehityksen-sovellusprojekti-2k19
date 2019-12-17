@@ -101,16 +101,16 @@
     </spacer>
    </item>
    <item row="3" column="1">
-    <widget class="QPushButton" name="btnToTransaction">
+    <widget class="QPushButton" name="btnToGift">
      <property name="text">
-      <string>Transaction</string>
+      <string>Gift</string>
      </property>
     </widget>
    </item>
    <item row="3" column="2">
     <widget class="QPushButton" name="btnToInvoices">
      <property name="text">
-      <string>Invoices</string>
+      <string>Pay Invoices</string>
      </property>
     </widget>
    </item>

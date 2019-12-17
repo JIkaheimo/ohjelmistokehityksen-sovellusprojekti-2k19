@@ -13,36 +13,36 @@ LIBS += $$PWD\..\..\build\databaseDLL.dll
 SOURCES += \
     depositview.cpp \
     eventview.cpp \
+    giftview.cpp \
     invoiceview.cpp \
     main.cpp \
     mainview.cpp \
     mainwindow.cpp \
     startview.cpp \
     summaryview.cpp \
-    transactionview.cpp \
     withdrawalview.cpp
 
 HEADERS += \
     Constants.h \
     depositview.h \
     eventview.h \
+    giftview.h \
     invoiceview.h \
     mainview.h \
     mainwindow.h \
     startview.h \
     summaryview.h \
-    transactionview.h \
     withdrawalview.h
 
 FORMS += \
     depositview.ui \
     eventview.ui \
+    giftview.ui \
     invoiceview.ui \
     mainview.ui \
     mainwindow.ui \
     startview.ui \
     summaryview.ui \
-    transactionview.ui \
     withdrawalview.ui
 
 # Default rules for deployment.

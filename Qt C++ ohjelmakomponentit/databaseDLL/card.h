@@ -1,31 +1,13 @@
 #ifndef CARD_H
 #define CARD_H
 
-#include "table.h"
+#include <QString>
 
-#include <QObject>
-#include <QSqlRecord>
-
-class QSqlTableModel;
-class QSqlDatabase;
-
-class Card : public Table
+class Card
 {
 
 public:
-    static const QString TABLE;
-    static const QString ID;
-    static const QString NUMBER;
-    static const QString PIN;
-    static const QString ACCOUNT_ID;
-
-    Card(QSqlDatabase& db);
-
-    int validate(QString cardNumber, int cardPin);
-
-private:
-    QSqlRecord selectItem(int id) override;
-
+    QString validate(const QString& cardNumber, const int cardPin) const;
 };
 
 #endif // CARD_H

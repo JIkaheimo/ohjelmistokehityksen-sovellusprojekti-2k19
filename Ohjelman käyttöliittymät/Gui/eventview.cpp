@@ -13,10 +13,14 @@ EventView::~EventView()
     delete ui;
 }
 
-void EventView::setEvents(QAbstractItemModel* eventModel)
+void EventView::setEvents(QAbstractItemModel& eventModel)
 {
-    ui->tableEvents->setModel(eventModel);
-    ui->tableEvents->hideColumn(0);
-    ui->tableEvents->hideColumn(2);
-    ui->tableEvents->sortByColumn(0, Qt::DescendingOrder);
+    clear();
+    ui->tableEvents->setModel(&eventModel);
+}
+
+void EventView::clear()
+{
+    // Make sure to delete any "hanging" model.
+    delete ui->tableEvents->model();
 }

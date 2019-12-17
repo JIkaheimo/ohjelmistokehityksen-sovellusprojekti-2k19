@@ -20,7 +20,7 @@ signals:
     void ToEvents();
     void ToDeposit();
     void ToSummary();
-    void ToTransaction();
+    void ToGift();
     void ToInvoices();
 
 private:

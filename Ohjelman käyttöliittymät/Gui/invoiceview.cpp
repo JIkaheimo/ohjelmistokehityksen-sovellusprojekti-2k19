@@ -16,28 +16,29 @@ InvoiceView::InvoiceView(QWidget *parent) :
             this, SLOT(onInvoiceChanged(int)));
 
     connect(ui->btnAction, &QPushButton::clicked,
-            [this]{ emit PayInvoice(ui->selectInvoice->currentText().toInt()); });
-
-    onInvoiceChanged(1);
+            this, &InvoiceView::onPayInvoice);
 }
 
 InvoiceView::~InvoiceView()
 {
-
+    clear();
     delete ui;
-
-    delete invoiceMapper;
-    invoiceMapper = nullptr;
 }
+
 
 void InvoiceView::onInvoiceChanged(int index)
 {
     invoiceMapper->setCurrentIndex(index);
+    updateButton();
 }
+
 
 void InvoiceView::setInvoices(QAbstractItemModel& invoices)
 {
+    delete invoiceModel;
     invoiceModel = &invoices;
+
+    ui->selectInvoice->setModel(invoiceModel);
 
     if (invoiceModel->rowCount() == 0)
     {
@@ -46,24 +47,43 @@ void InvoiceView::setInvoices(QAbstractItemModel& invoices)
     }
     else
     {
-        ui->selectInvoice->setModel(invoiceModel);
-        ui->selectInvoice->setCurrentIndex(0);
-
         invoiceMapper->setModel(invoiceModel);
-        invoiceMapper->addMapping(ui->editNumber, 0);
-        invoiceMapper->addMapping(ui->editAmount, 1);
-        invoiceMapper->addMapping(ui->editDate, 2);
-        invoiceMapper->addMapping(ui->editReceiver, 3);
-        invoiceMapper->addMapping(ui->editName, 4);
-
-
+        invoiceMapper->addMapping(ui->textNumber, 0, "text");
+        invoiceMapper->addMapping(ui->textAmount, 1, "text");
+        invoiceMapper->addMapping(ui->textDate, 2, "date");
+        invoiceMapper->addMapping(ui->textReceiver, 3, "text");
+        invoiceMapper->addMapping(ui->textName, 4, "text");
         invoiceMapper->toFirst();
     }
 
+}
+
+void InvoiceView::setLimit(float limit)
+{
+    m_payLimit = limit;
+    updateButton();
+}
+
+void InvoiceView::updateButton()
+{
+    bool canPay = m_payLimit >= ui->textAmount->text().toFloat();
+    ui->btnAction->setEnabled(canPay);
 }
 
 void InvoiceView::removeInvoice()
 {
     invoiceModel->removeRow(ui->selectInvoice->currentIndex());
     invoiceMapper->submit();
+}
+
+void InvoiceView::onPayInvoice()
+{
+    int invoiceNumber = ui->textNumber->text().toInt();
+    emit PayInvoice(invoiceNumber);
+}
+
+void InvoiceView::clear()
+{
+    delete invoiceModel;
+    invoiceModel = nullptr;
 }

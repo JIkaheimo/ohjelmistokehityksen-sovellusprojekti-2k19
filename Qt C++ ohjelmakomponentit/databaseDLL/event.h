@@ -1,11 +1,11 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include "table.h"
+#include <QString>
 
 class QAbstractItemModel;
 
-class Event : public Table
+class Event
 {
 public:
 
@@ -15,23 +15,19 @@ public:
     static const QString TIME;
     static const QString AMOUNT;
     static const QString BALANCE;
-    static const QString ACCOUNT_ID;
+    static const QString ACCOUNT;
 
     enum Type {
         Withdrawal,
         Deposit,
-        Invoice
+        Invoice,
+        Gift
     };
-    Q_ENUM(Type)
 
-    Event(QSqlDatabase& db);
+    bool addEvent(QString accountIBAN, Event::Type type, float amount, float balance);
 
-    bool addEvent(int accountId, Event::Type type, float amount, float balance);
-    QAbstractItemModel* getRecentEvents(int accountId, int num);
-    QAbstractItemModel* getEvents(int accountId);
-
-private:
-    QSqlRecord selectItem(int eventId);
+    QAbstractItemModel* getRecentEvents(QString accountIBAN, int num);
+    QAbstractItemModel* getEvents(QString accountIBAN);
 };
 
 #endif // EVENT_H

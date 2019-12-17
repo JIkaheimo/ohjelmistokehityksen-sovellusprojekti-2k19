@@ -12,7 +12,6 @@
 
 #include <ui_mainwindow.h>
 
-const bool ENABLE_LOGGING = true;
 
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
@@ -69,15 +68,16 @@ MainWindow::~MainWindow()
 }
 
 
-/** LIB INITIALIZATIONS */
+/** ========= LIB INITIALIZATIONS ================ */
 
 
-bool MainWindow::initDB() // DONE
+bool MainWindow::initDB()
+
 {
     connect(m_db, &DatabaseDLL::ErrorHappened,
             this, &MainWindow::displayError);
 
-    if (ENABLE_LOGGING)
+    if (Default::IsLogged)
     {
         connect(m_db, &DatabaseDLL::Logger,
                 this, [=](QString logged){ logger(Logger::DB, logged); });
@@ -90,9 +90,10 @@ bool MainWindow::initDB() // DONE
 }
 
 
-void MainWindow::initPin() // DONE
+void MainWindow::initPin()
 {
-    if (ENABLE_LOGGING)
+
+    if (Default::IsLogged)
     {
         connect(m_pin, &PinDLL::Logger,
                 this, &MainWindow::logger);
@@ -108,7 +109,7 @@ void MainWindow::initPin() // DONE
 
 void MainWindow::initRfid() // DONE
 {
-    if (ENABLE_LOGGING)
+    if (Default::IsLogged)
     {
         connect(m_rfid, &RfidDLL::Logger,
                 this, [=](QString logged){ logger(Logger::Rfid, logged); });
@@ -125,13 +126,10 @@ void MainWindow::initRfid() // DONE
 }
 
 
-/** VIEW INITIALIZATIONS */
+/** ============= VIEW INITIALIZATIONS =================== */
 
 
 void MainWindow::initMainView() // DONE
-/**
-  * Initializes MainView with any required connections.
-  */
 {
     // Connect navigation to different views from the main view.
 
@@ -410,6 +408,9 @@ void MainWindow::logout()
 
     displayInfo(BSMessage::Logout);
 }
+
+
+/** ======= LOGGING AND MESSAGES ======= */
 
 
 void MainWindow::logger(const QString& source, const QString& description)

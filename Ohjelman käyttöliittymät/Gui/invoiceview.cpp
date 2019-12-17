@@ -22,6 +22,10 @@ InvoiceView::InvoiceView(QWidget *parent) :
 InvoiceView::~InvoiceView()
 {
     clear();
+
+    delete invoiceMapper;
+    invoiceMapper = nullptr;
+
     delete ui;
 }
 

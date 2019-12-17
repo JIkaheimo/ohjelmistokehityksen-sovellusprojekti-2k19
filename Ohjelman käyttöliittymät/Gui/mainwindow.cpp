@@ -361,7 +361,10 @@ void MainWindow::toInvoiceView()
 void MainWindow::onPinEntered(const int pinCode)
 {
     if (!m_db->login(m_cardNumber, pinCode))
+    {
+        m_cardNumber = "";
         return;
+    }
 
 
     QString accOwner = m_db->getAccountOwner();

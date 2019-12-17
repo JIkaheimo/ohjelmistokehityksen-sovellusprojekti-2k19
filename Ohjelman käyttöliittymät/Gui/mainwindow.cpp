@@ -12,6 +12,7 @@
 
 #include <ui_mainwindow.h>
 
+const bool ENABLE_LOGGING = true;
 
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
@@ -34,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent):
     initMainView();
     initWithdrawalView();
     initDepositView();
-    initTransactionView();
+    initGiftView();
     initInvoicesView();
 
     showView(ui->startView);
@@ -42,10 +43,10 @@ MainWindow::MainWindow(QWidget *parent):
     show();
 
     // Library initializations
-
     initPin();
     initRfid();
 
+    // Disable GUI if DB initialization fails.
     if (!initDB())
     {
         ui->startView->setEnabled(false);
@@ -71,14 +72,16 @@ MainWindow::~MainWindow()
 /** LIB INITIALIZATIONS */
 
 
-bool MainWindow::initDB()
+bool MainWindow::initDB() // DONE
 {
-
     connect(m_db, &DatabaseDLL::ErrorHappened,
             this, &MainWindow::displayError);
 
-    connect(m_db, &DatabaseDLL::Logger,
-            this, [=](QString logged){ logger(Logger::DB, logged); });
+    if (ENABLE_LOGGING)
+    {
+        connect(m_db, &DatabaseDLL::Logger,
+                this, [=](QString logged){ logger(Logger::DB, logged); });
+    }
 
     connect(m_db, &DatabaseDLL::BalanceChanged,
             this, &MainWindow::showBalance);
@@ -87,10 +90,13 @@ bool MainWindow::initDB()
 }
 
 
-void MainWindow::initPin()
+void MainWindow::initPin() // DONE
 {
-    connect(m_pin, &PinDLL::Logger,
-            this, &MainWindow::logger);
+    if (ENABLE_LOGGING)
+    {
+        connect(m_pin, &PinDLL::Logger,
+                this, &MainWindow::logger);
+    }
 
     connect(m_pin, &PinDLL::PinEntered,
             this, &MainWindow::onPinEntered);
@@ -100,10 +106,13 @@ void MainWindow::initPin()
 }
 
 
-void MainWindow::initRfid()
+void MainWindow::initRfid() // DONE
 {
-    connect(m_rfid, &RfidDLL::Logger,
-            this, [=](QString logged){ logger(Logger::Rfid, logged); });
+    if (ENABLE_LOGGING)
+    {
+        connect(m_rfid, &RfidDLL::Logger,
+                this, [=](QString logged){ logger(Logger::Rfid, logged); });
+    }
 
     connect(m_rfid, &RfidDLL::ErrorHappened,
             this, &MainWindow::displayError);
@@ -119,7 +128,7 @@ void MainWindow::initRfid()
 /** VIEW INITIALIZATIONS */
 
 
-void MainWindow::initMainView()
+void MainWindow::initMainView() // DONE
 /**
   * Initializes MainView with any required connections.
   */
@@ -138,15 +147,15 @@ void MainWindow::initMainView()
     connect(ui->mainView, &MainView::ToDeposit,
             this, &MainWindow::toDepositView);
 
-    connect(ui->mainView, &MainView::ToTransaction,
-            this, &MainWindow::toTransactionView);
+    connect(ui->mainView, &MainView::ToGift,
+            this, &MainWindow::toGiftView);
 
     connect(ui->mainView, &MainView::ToInvoices,
             this, &MainWindow::toInvoiceView);
 }
 
 
-void MainWindow::initStartView()
+void MainWindow::initStartView() // DONE
 /**
   * Initializes StartView with any required connections.
   */
@@ -159,10 +168,13 @@ void MainWindow::initStartView()
 }
 
 
-void MainWindow::initTransactionView()
+void MainWindow::initGiftView()
 {
-    connect(ui->transactionView, &TransactionView::Transfer,
-            this, &MainWindow::onTransaction);
+    connect(m_db, &DatabaseDLL::BalanceChanged,
+           ui->giftView, &GiftView::setGiftable);
+
+    connect(ui->giftView, &GiftView::Transfer,
+            this, &MainWindow::onTransfer);
 }
 
 
@@ -173,9 +185,12 @@ void MainWindow::initInvoicesView()
 
     connect(ui->invoiceView, &InvoiceView::NoInvoices,
             this, [this]{
-                displayInfo("No invoices available.");
                 previousView();
+                displayInfo("No invoices available.");
             });
+
+    connect(m_db, &DatabaseDLL::BalanceChanged,
+            ui->invoiceView, &InvoiceView::setLimit);
 }
 
 
@@ -241,15 +256,12 @@ void MainWindow::previousView()
     // If the stack is empty, user is back to the start view
     // -> Logout
     if (m_viewHistory.isEmpty())
-    {
-        m_db->logout();
-        displayInfo(BSMessage::Logout);
-    }
+        logout();
 
 }
 
 
-void MainWindow::onDeposit(float amount)
+void MainWindow::onDeposit(const float amount)
 {
     if (m_db->deposit(amount))
         displayInfo(BSMessage::Deposit);
@@ -258,16 +270,16 @@ void MainWindow::onDeposit(float amount)
 }
 
 
-void MainWindow::onTransaction(int receiverId, float amount)
+void MainWindow::onTransfer(QString IBAN, float amount)
 {
-    if (m_db->transfer(receiverId, amount))
+    if (m_db->transfer(IBAN, amount))
         displayInfo(BSMessage::Transfer);
     else
         displayError(BSError::Transfer);
 }
 
 
-void MainWindow::onPayInvoice(int invoiceId)
+void MainWindow::onPayInvoice(const int invoiceId)
 {
     if (m_db->payInvoice(invoiceId))
     {
@@ -279,7 +291,7 @@ void MainWindow::onPayInvoice(int invoiceId)
 }
 
 
-void MainWindow::onWithdrawal(float amount)
+void MainWindow::onWithdrawal(const float amount)
 {
     if (m_db->withdraw(amount))
         displayInfo(BSMessage::Withdrawal);
@@ -294,17 +306,22 @@ void MainWindow::readCard()
 }
 
 
-void MainWindow::onCardRead(QString cardNumber)
+void MainWindow::onCardRead(const QString& cardNumber)
 {
-    m_cardNumber = cardNumber;
-    m_pin->getPin(this);
+    if (m_cardNumber.isEmpty())
+    {
+        m_cardNumber = cardNumber;
+        m_pin->getPin(this);
+    }
 }
 
 void MainWindow::toSummaryView()
+/**
+  * Fetches any data shown in the summary view and displays it before changing the view.
+  */
 {
-    ui->summaryView->setOwner(m_db->getAccountOwner());
-    ui->summaryView->setAccountNumber(m_db->getAccountNumber());
-    ui->summaryView->setEvents(*m_db->getRecentEvents(Default::NumRecentEvents));
+    QAbstractItemModel* recentEvents = m_db->getRecentEvents(Default::NumRecentEvents);
+    ui->summaryView->setEvents(*recentEvents);
 
     setCurrentView(ui->summaryView);
 }
@@ -318,7 +335,7 @@ void MainWindow::toWithdrawalView()
 
 void MainWindow::toEventView()
 {
-    ui->eventView->setEvents(m_db->getEvents());
+    ui->eventView->setEvents(*m_db->getEvents());
     setCurrentView(ui->eventView);
 }
 
@@ -328,9 +345,10 @@ void MainWindow::toDepositView()
 }
 
 
-void MainWindow::toTransactionView()
+void MainWindow::toGiftView()
 {
-    setCurrentView(ui->transactionView);
+    ui->giftView->setReceivers(*m_db->getOtherAccounts());
+    setCurrentView(ui->giftView);
 }
 
 void MainWindow::toInvoiceView()
@@ -340,35 +358,89 @@ void MainWindow::toInvoiceView()
 }
 
 
-void MainWindow::onPinEntered(int pinCode)
+void MainWindow::onPinEntered(const int pinCode)
 {
-    if (m_db->login(m_cardNumber, pinCode))
-        setCurrentView(ui->mainView);
+    if (!m_db->login(m_cardNumber, pinCode))
+        return;
+
+
+    QString accOwner = m_db->getAccountOwner();
+    QString accNumber = m_db->getAccountNumber();
+
+    ui->summaryView->setOwner(accOwner);
+    ui->summaryView->setAccountNumber(accNumber);
+
+     setCurrentView(ui->mainView);
 }
 
 
-void MainWindow::showBalance(float balance)
+void MainWindow::showBalance(const float balance)
+/**
+  * Updates the balance displayed.
+  */
 {
+    double balanceAsDouble = static_cast<double>(balance);
+
     QString balanceString;
-    balanceString.sprintf("BAL: %9.2f€", static_cast<double>(balance));
+    balanceString.sprintf("BAL: %9.2f€", balanceAsDouble);
 
     ui->labelBalance->setText(balanceString);
 }
 
 
-void MainWindow::logger(QString source, QString description)
+void MainWindow::logout()
+/**
+  * Does any cleaning up when the user logouts.
+  */
 {
-    qDebug() << QString("LOGGING - src: %1, desc: %2").arg(source).arg(description);
+    m_cardNumber = "";
+
+    // Make sure account data is cleared on logout.
+
+    ui->summaryView->clear();
+    ui->invoiceView->clear();
+    ui->giftView->clear();
+    ui->eventView->clear();
+
+    // Make sure to logout from the database.
+    m_db->logout();
+
+    displayInfo(BSMessage::Logout);
 }
 
 
-void MainWindow::displayInfo(QString message)
+void MainWindow::logger(const QString& source, const QString& description)
+/**
+  * Logs information to the application output.
+  *
+  * Params:
+  * source (QString) of the log statement.
+  * description (QString)
+  */
+{
+    qDebug() << QString("LOGGING - src: %1, desc: %2").arg(source, description);
+}
+
+
+void MainWindow::displayInfo(const QString& message)
+/**
+  * Displays informative message to the user.
+  *
+  * Params:
+  * message (QString) being displayed.
+  */
 {
     QMessageBox::information(this, "", message);
 }
 
 
-void MainWindow::displayError(QString message)
+void MainWindow::displayError(const QString& message)
+/**
+  * Displays error message to the user.
+  *
+  * Params:
+  * message (QString) being displayed.
+  */
 {
     QMessageBox::warning(this, "Error occured", message);
 }

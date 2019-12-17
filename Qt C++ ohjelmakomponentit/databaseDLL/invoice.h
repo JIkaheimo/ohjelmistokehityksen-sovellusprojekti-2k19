@@ -1,29 +1,22 @@
 #ifndef INVOICE_H
 #define INVOICE_H
 
-#include "table.h"
+#include <qsqlrecord.h>
 
 class QAbstractItemModel;
 
-class Invoice : Table
+class Invoice
 {
 public:
-   Invoice(QSqlDatabase &db);
-
    bool setPaid(int invoiceNumber);
 
    QSqlRecord getInvoice(int invoiceNumber);
-   float getAmount(int invoiceNumber);
-   int getReceiver(int invoiceNumber);
 
    // Table interface
-   QAbstractItemModel* getOpenInvoices(int payerId);
+   QAbstractItemModel* getOpenInvoices(QString accountIBAN);
 
    static float getAmount(QSqlRecord& invoice);
-   static int getReceiver(QSqlRecord& invoice);
-
-private:
-    QSqlRecord selectItem(int id);
+   static QString getReceiver(QSqlRecord& invoice);
 
 };
 

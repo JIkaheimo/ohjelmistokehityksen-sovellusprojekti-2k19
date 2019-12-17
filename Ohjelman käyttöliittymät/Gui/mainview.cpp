@@ -28,8 +28,8 @@ MainView::MainView(QWidget *parent) :
     );
 
     connect(
-        ui->btnToTransaction, &QPushButton::clicked,
-        this, [this]{ emit ToTransaction(); }
+        ui->btnToGift, &QPushButton::clicked,
+        this, [this]{ emit ToGift(); }
     );
 
     connect(

@@ -1,71 +1,77 @@
 #include "event.h"
 
 #include <QSqlTableModel>
-#include <QDebug>
 #include <QDateTime>
+#include <QSqlRecord>
+#include <QSqlQuery>
 
-const QString Event::TABLE = "event";
+const QString Event::TABLE = "Event";
 const QString Event::ID = "id";
 const QString Event::TYPE = "type";
 const QString Event::TIME = "time";
 const QString Event::AMOUNT = "amount";
 const QString Event::BALANCE = "balance";
-const QString Event::ACCOUNT_ID = "idAccount";
-
-const QString TYPES[] = {"withdrawal", "deposit", "invoice"};
+const QString Event::ACCOUNT = "account";
 
 
-Event::Event(QSqlDatabase& db) :
-    Table(db, TABLE)
+const QString TYPES[] = {"withdrawal", "deposit", "invoice", "gift"};
+
+
+bool Event::addEvent(QString accountIBAN, Event::Type type, float amount, float balance)
 {
-}
+    QSqlTableModel events;
+    events.setTable(TABLE);
 
-
-bool Event::addEvent(int accountId, Event::Type type, float amount, float balance)
-{
     // Generate event timestamp
     QDateTime timestamp = QDateTime::currentDateTime();
 
     // Create and populate a new event record.
-    QSqlRecord newEvent = mModel->record();
+    QSqlRecord newEvent = events.record();
 
     newEvent.setValue(TYPE, TYPES[type]);
-    newEvent.setValue(ACCOUNT_ID, accountId);
+    newEvent.setValue(ACCOUNT, accountIBAN);
     newEvent.setValue(TIME, timestamp.toString("yyyy-MM-dd hh:mm:ss"));
     newEvent.setValue(AMOUNT, amount);
     newEvent.setValue(BALANCE, balance);
 
-    return mModel->insertRecord(-1, newEvent) && mModel->submit();
+    return events.insertRecord(-1, newEvent) && events.submit();
 }
 
 
-QAbstractItemModel* Event::getRecentEvents(int accountId, int num)
+QAbstractItemModel* Event::getRecentEvents(QString accountIBAN, int num)
 {
-    QSqlQueryModel* recentEvents = new QSqlQueryModel(this);
+    QSqlQueryModel* model = new QSqlQueryModel();
 
-    QString queryStr =
-        QString(
-            "SELECT %1, %2, %3, %4 FROM %5 "
-            "WHERE %6 = %7 "
-            "ORDER BY %1 DESC "
-            "LIMIT %8"
-        )
-        .arg(TIME, TYPE, AMOUNT, BALANCE, TABLE, ACCOUNT_ID, QString::number(accountId), QString::number(num));
+    QSqlQuery query;
+    query.prepare(
+        "SELECT time, amount, balance, type FROM Event "
+        "WHERE account = :account "
+        "ORDER BY time DESC LIMIT :num"
+    );
 
-    recentEvents->setQuery(queryStr);
+    query.bindValue(":account", accountIBAN);
+    query.bindValue(":num", num);
+    query.exec();
 
-    return recentEvents;
+    model->setQuery(query);
+    return model;
 }
 
 
-QAbstractItemModel* Event::getEvents(int accountId)
+QAbstractItemModel* Event::getEvents(QString accountIBAN)
 {
-    mModel->setFilter(QString("%1 = %2").arg(ACCOUNT_ID, QString::number(accountId)));
-    mModel->select();
-    return mModel;
-}
+    QSqlQueryModel* model = new QSqlQueryModel();
 
-QSqlRecord Event::selectItem(int eventId)
-{
+    QSqlQuery query;
+    query.prepare(
+        "SELECT time, amount, balance, type FROM Event "
+        "WHERE account = :account "
+        "ORDER BY time DESC"
+    );
 
+    query.bindValue(":account", accountIBAN);
+    query.exec();
+
+    model->setQuery(query);
+    return model;
 }

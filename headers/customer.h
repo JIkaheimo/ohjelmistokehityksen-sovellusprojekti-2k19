@@ -1,27 +1,12 @@
 #ifndef CUSTOMER_H
 #define CUSTOMER_H
 
-#include "table.h"
+#include <QString>
 
-
-
-class Customer : Table
+class Customer
 {
 public:
-    static const QString TABLE;
-    static const QString ID;
-    static const QString FIRST_NAME;
-    static const QString LAST_NAME;
-
-    Customer(QSqlDatabase& db);
-
-    QString getName(int customerId);
-    // Table interface
-
-
-private:
-    QSqlRecord selectItem(int id);
-
+    QString getName(const int customerId) const;
 };
 
 #endif // CUSTOMER_H

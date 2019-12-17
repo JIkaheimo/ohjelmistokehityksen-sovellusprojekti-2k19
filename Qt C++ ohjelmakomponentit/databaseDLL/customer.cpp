@@ -1,33 +1,21 @@
 #include "customer.h"
+
+#include <QSqlQuery>
 #include <QSqlTableModel>
 
-const QString Customer::TABLE = "customer";
-const QString Customer::ID = "id";
-const QString Customer::FIRST_NAME = "firstName";
-const QString Customer::LAST_NAME = "lastName";
-
-
-Customer::Customer(QSqlDatabase &db)
-    : Table(db, TABLE)
+QString Customer::getName(const int customerId) const
 {
+    QSqlQuery query;
+
+    query.prepare(
+        "SELECT CONCAT(first_name, ' ', last_name) as name "
+        "FROM Customer WHERE id=:id"
+    );
+    query.bindValue(":id", customerId);
+
+    if (query.exec() && query.first())
+        return query.value(0).toString();
+
+    return "Name unavailable.";
 }
 
-QString Customer::getName(int customerId)
-{
-    QSqlRecord customer = selectItem(customerId);
-    QString firstName = customer.value(FIRST_NAME).toString();
-    QString lastName = customer.value(LAST_NAME).toString();
-
-    return QString("%1 %2").arg(firstName, lastName);
-}
-
-QSqlRecord Customer::selectItem(int customerId)
-{
-    if (mLastId != customerId)
-    {
-        mModel->setFilter(QString("%1 = %2").arg(ID, QString::number(customerId)));
-        mModel->select();
-        mLastId = customerId;
-    }
-    return mModel->record(0);
-}

@@ -18,7 +18,8 @@ public:
     ~EventView();
 
 public slots:
-    void setEvents(QAbstractItemModel* eventModel);
+    void setEvents(QAbstractItemModel& eventModel);
+    void clear();
 
 private:
     Ui::EventView *ui;

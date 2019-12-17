@@ -53,7 +53,7 @@ font-weight: bold;
 }
 
 QDoubleSpinBox, QLineEdit, QSpinBox, QComboBox, QDateEdit {
-	font-size: 20px;
+	font-size: 16px;
 }
 
 QLabel#labelInfo {
@@ -180,7 +180,7 @@ padding: 8px;
          </property>
         </widget>
         <widget class="InvoiceView" name="invoiceView"/>
-        <widget class="TransactionView" name="transactionView"/>
+        <widget class="GiftView" name="giftView"/>
         <widget class="SummaryView" name="summaryView"/>
         <widget class="WithdrawalView" name="withdrawalView">
          <property name="sizePolicy">
@@ -244,9 +244,9 @@ padding: 8px;
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>TransactionView</class>
+   <class>GiftView</class>
    <extends>QWidget</extends>
-   <header>transactionview.h</header>
+   <header>giftview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

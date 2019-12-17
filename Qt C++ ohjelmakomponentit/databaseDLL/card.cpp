@@ -1,34 +1,25 @@
 #include "card.h"
 
+#include <QSqlQuery>
 #include <QSqlTableModel>
 
-const QString Card::TABLE = "card";
-const QString Card::ID = "id";
-const QString Card::NUMBER = "identifier";
-const QString Card::PIN = "pin";
-const QString Card::ACCOUNT_ID = "idAccount";
-
-Card::Card(QSqlDatabase& db) :
-    Table(db, TABLE)
+QString Card::validate(const QString& cardNumber, const int cardPin) const
+/**
+  * Checks if the given card information is valid. Returns
+  * IBAN of the associated account if one exists.
+  */
 {
-}
+    QSqlQuery query;
+    query.prepare(
+        "SELECT account FROM Card "
+        "WHERE number=:number AND pin=:pin"
+    );
 
-QSqlRecord Card::selectItem(int cardId)
-{
-    mModel->setFilter(QString("%1 = %2").arg(ID, QString::number(cardId)));
-    mModel->select();
-    return mModel->record(0);
-}
+    query.bindValue(":number", cardNumber);
+    query.bindValue(":pin", cardPin);
 
-int Card::validate(QString cardNumber, int cardPin)
-{
-    mModel->setFilter(QString("%1 = '%2' AND %3 = %4")
-      .arg(NUMBER, cardNumber, PIN, QString::number(cardPin)));
+    if (query.exec() && query.first())
+        return query.value(0).toString();
 
-    mModel->select();
-
-    if (mModel->rowCount() == 1)
-        return mModel->record(0).value(ACCOUNT_ID).toInt();
-
-    return -1;
+    return "";
 }

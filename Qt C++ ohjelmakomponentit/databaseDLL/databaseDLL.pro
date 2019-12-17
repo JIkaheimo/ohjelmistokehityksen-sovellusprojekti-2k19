@@ -15,8 +15,7 @@ SOURCES += \
     customer.cpp \
     databasedll.cpp \
     event.cpp \
-    invoice.cpp \
-    table.cpp
+    invoice.cpp
 
 HEADERS += \
     LibConstants.h \
@@ -26,8 +25,7 @@ HEADERS += \
     databaseDLL_global.h \
     databasedll.h \
     event.h \
-    invoice.h \
-    table.h
+    invoice.h
 
 QT       += core gui serialport
 

@@ -4,9 +4,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
-#include <QDebug>
 const QString WITHDRAWAL_QUESTION = "Do you want to withdraw %1€?";
-
 
 WithdrawalView::WithdrawalView(QWidget *parent) :
     QWidget(parent),

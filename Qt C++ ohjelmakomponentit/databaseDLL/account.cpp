@@ -1,65 +1,69 @@
 #include "account.h"
 
-#include <QSqlDatabase>
 #include <QSqlTableModel>
-#include <QString>
-#include <QSqlRecord>
+#include <QSqlQuery>
 
-const QString Account::TABLE = "account";
-const QString Account::ID = "id";
-const QString Account::CUSTOMER_ID = "idCustomer";
-const QString Account::NUMBER = "number";
-const QString Account::BALANCE = "balance";
-
-Account::Account(QSqlDatabase& db) :
-    Table(db, TABLE)
+bool Account::setBalance(const QString& accountIBAN, const float amount) const
 {
-}
+    QSqlQuery query;
+    query.prepare(
+        "UPDATE Account SET balance = :balance "
+        "WHERE IBAN =:IBAN"
+    );
 
-bool Account::setBalance(int accountId, float amount)
-{
-    QSqlRecord account = selectItem(accountId);
-    account.setValue(BALANCE, amount);
-    mModel->setRecord(0, account);
-    return mModel->submit();
-}
+    query.bindValue(":balance", amount);
+    query.bindValue(":IBAN", accountIBAN);
 
- QAbstractItemModel* Account::getOthers(int accountId)
-{
-
-    mModel->setFilter(QString("%1 != %2").arg(ID).arg(accountId));
-    mModel->select();
-    return mModel;
-}
-
-float Account::getBalance(int accountId)
-{
-    QSqlRecord account = selectItem(accountId);
-    return account.value(BALANCE).toFloat();
+    return query.exec();
 }
 
 
-QString Account::getNumber(int accountId)
+ QAbstractItemModel* Account::getOtherAccounts(const QString& accountIBAN) const
 {
-    QSqlRecord account = selectItem(accountId);
-    return account.value(NUMBER).toString();
+    QSqlQueryModel* model = new QSqlQueryModel();
+
+    QSqlQuery query;
+    query.prepare(
+        "SELECT IBAN FROM Account WHERE IBAN!=:IBAN"
+    );
+    query.bindValue(":IBAN", accountIBAN);
+    query.exec();
+
+    model->setQuery(query);
+    return model;
 }
 
 
-int Account::getCustomerId(int accountId)
+float Account::getBalance(const QString& accountIBAN) const
 {
-    QSqlRecord account = selectItem(accountId);
-    return account.value(CUSTOMER_ID).toInt();
+    QSqlQuery query;
+    query.prepare(
+        "SELECT balance FROM Account "
+        "WHERE IBAN=:IBAN"
+    );
+    query.bindValue(":IBAN", accountIBAN);
+
+    if (query.exec() && query.first())
+        return query.value(0).toFloat();
+
+    return -1;
 }
 
 
-QSqlRecord Account::selectItem(int accountId)
+int Account::getCustomerId(const QString& accountIBAN) const
 {
-    if (mLastId != accountId)
-    {
-        mModel->setFilter(QString("%1 = %2").arg(ID).arg(accountId));
-        mLastId = accountId;
-    }
-    mModel->select();
-    return mModel->record(0);
+    QSqlQuery query;
+    query.prepare(
+        "SELECT customer FROM Account "
+        "WHERE IBAN =:IBAN"
+    );
+    query.bindValue(":IBAN", accountIBAN);
+
+    if (query.exec() && query.first())
+        return query.value(0).toInt();
+
+    return -1;
 }
+
+
+

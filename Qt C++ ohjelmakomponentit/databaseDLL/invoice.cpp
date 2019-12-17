@@ -2,85 +2,67 @@
 #include "account.h"
 #include "customer.h"
 
-#include <QDateTime>
 #include <QSqlRelationalTableModel>
 #include <QSqlTableModel>
+#include <QSqlQuery>
 
-const QString TABLE = "invoice";
-const QString PAYER = "idPayer";
+const QString TABLE = "Invoice";
+const QString PAYER = "payer";
 const QString AMOUNT = "amount";
-const QString RECEIVER = "idReceiver";
+const QString RECEIVER = "receiver";
 const QString NUMBER = "number";
 const QString PAID = "paid";
 const QString DATE = "date";
 
-Invoice::Invoice(QSqlDatabase &db)
-    : Table(db, TABLE)
-{
-
-}
 
 bool Invoice::setPaid(int invoiceNumber)
 {
-    QSqlRecord invoice = selectItem(invoiceNumber);
+    QSqlQuery query;
+    query.prepare(
+        "UPDATE Invoice SET paid=CURDATE() "
+        "WHERE number=:number"
+    );
+    query.bindValue(":number", invoiceNumber);
 
-    QDateTime timestamp = QDateTime::currentDateTime();
-
-    invoice.setValue(PAID, timestamp.toString("yyyy-MM-dd hh:mm:ss"));
-    mModel->setRecord(0, invoice);
-    return mModel->submit();
-}
-
-QSqlRecord Invoice::getInvoice(int invoiceNumber)
-{
-    return selectItem(invoiceNumber);
+    return query.exec();
 }
 
 
-float Invoice::getAmount(int invoiceNumber)
-{
-    QSqlRecord invoice = selectItem(invoiceNumber);
-    return invoice.value(AMOUNT).toFloat();
-}
-
-
-int Invoice::getReceiver(int invoiceNumber)
-{
-    QSqlRecord invoice = selectItem(invoiceNumber);
-    return invoice.value(RECEIVER).toInt();
-}
-
-
-QAbstractItemModel* Invoice::getOpenInvoices(int payerId)
+QAbstractItemModel* Invoice::getOpenInvoices(QString accountIBAN)
 {
     QSqlQueryModel* openInvoices = new QSqlQueryModel();
 
-    const QString query = QString(
-            "SELECT %1.number, %1.amount, %1.date, %2.number, CONCAT(%3.firstName, %3.lastName) as name "
-            "FROM %1 JOIN %2 ON %1.idReceiver = %2.id "
-            "JOIN %3 ON %2.idCustomer = %3.id "
-            "WHERE %1.idPayer = %4 AND %1.paid IS NULL").arg(TABLE, Account::TABLE, Customer::TABLE, QString::number(payerId));
+    QString query = QString(
+        "SELECT Invoice.number, Invoice.amount, Invoice.date, Account.IBAN, CONCAT(Customer.first_name, Customer.last_name) as name "
+        "FROM Invoice JOIN Account ON Invoice.receiver = Account.IBAN "
+        "JOIN Customer ON Account.customer = Customer.id "
+        "WHERE Invoice.payer = '%1' AND Invoice.paid IS NULL").arg(accountIBAN);
 
     openInvoices->setQuery(query);
 
     return openInvoices;
 }
 
+
 float Invoice::getAmount(QSqlRecord &invoice)
 {
     return invoice.value(AMOUNT).toFloat();
 }
 
-int Invoice::getReceiver(QSqlRecord &invoice)
+
+QString Invoice::getReceiver(QSqlRecord &invoice)
 {
-    return invoice.value(RECEIVER).toInt();
+    return invoice.value(RECEIVER).toString();
 }
 
-QSqlRecord Invoice::selectItem(int invoiceNumber)
+
+QSqlRecord Invoice::getInvoice(int invoiceNumber)
 {
+    QSqlTableModel model;
 
-    mModel->setFilter(QString("%1 = %2").arg(NUMBER, QString::number(invoiceNumber)));
-    mModel->select();
+    model.setTable(TABLE);
+    model.setFilter(QString("%1 = %2").arg(NUMBER, QString::number(invoiceNumber)));
+    model.select();
 
-    return mModel->record(0);
+    return model.record(0);
 }

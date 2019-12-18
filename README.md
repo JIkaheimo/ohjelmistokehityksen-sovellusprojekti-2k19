@@ -1,6 +1,9 @@
 # BankSimul (Ohjelmistokehityksen sovellusprojekti)
+Tämä repositorio on ohjelmistokehityksen opiskelijoiden (TVT19KMO), ryhmän 5 sovellusprojekti syyslukukauden periodille 2, 2019.
 
-`Viimeisimpien bonus-featureiden dokumentointi jäi osittain kesken...`
+Notes:
+* `Dokumentoi bonus-featuret, jos aikaa jää.`
+* `Siisti koodia.`
 
 ## Dokumentit
 * [Tekninen määrittely](https://github.com/JIkaheimo/ohjelmistokehityksen-sovellusprojekti-2k19/blob/master/Tekninen%20m%C3%A4%C3%A4rittelydokumentti/Tekninen_m%C3%A4%C3%A4rittelydokumentti.docx)

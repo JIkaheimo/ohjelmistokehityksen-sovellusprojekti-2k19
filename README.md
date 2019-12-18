@@ -1,4 +1,4 @@
-# BankSimul (Ohjelmistokehityksen sovellusprojekti)
+# BankSimul
 Tämä repositorio on ohjelmistokehityksen opiskelijoiden (TVT19KMO), ryhmän 5 sovellusprojekti syyslukukauden periodille 2, 2019.
 
 Notes:

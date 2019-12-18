@@ -6,10 +6,6 @@ Tämä repositorio on ohjelmistokehityksen opiskelijoiden (TVT19KMO), ryhmän 5 
 ## Ohje
 Aja koko projekti avaamalla Ohjelman käyttöliittymät -> Gui -> Gui.pro QtCreatorilla, ja ajamalla release-modessa.
 
-#### Todo
-* `Dokumentoi bonus-featuret, jos aikaa jää.`
-* `Siisti koodia.`
-
 ## Dokumentit
 * [Tekninen määrittely](https://github.com/JIkaheimo/ohjelmistokehityksen-sovellusprojekti-2k19/blob/master/Tekninen%20m%C3%A4%C3%A4rittelydokumentti/Tekninen_m%C3%A4%C3%A4rittelydokumentti.docx)
 * [Toiminnallinen määrittely](https://github.com/JIkaheimo/ohjelmistokehityksen-sovellusprojekti-2k19/blob/master/Toiminnallinen%20m%C3%A4%C3%A4rittelydokumentti/Toiminallinen_m%C3%A4%C3%A4rittelydokumentti.docx)
@@ -30,3 +26,7 @@ Aja koko projekti avaamalla Ohjelman käyttöliittymät -> Gui -> Gui.pro QtCrea
 
 ## Muuta
 * [Projektin tietokanta](https://github.com/JIkaheimo/ohjelmistokehityksen-sovellusprojekti-2k19/blob/master/Muu/tietokanta.mwb)
+
+## TODO
+* `Dokumentoi bonus-featuret, jos aikaa jää.`
+* `Siisti koodia.`

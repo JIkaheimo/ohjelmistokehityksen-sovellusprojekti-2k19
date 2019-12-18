@@ -1,7 +1,10 @@
 # BankSimul
 Tämä repositorio on ohjelmistokehityksen opiskelijoiden (TVT19KMO), ryhmän 5 sovellusprojekti syyslukukauden periodille 2, 2019.
 
-Notes:
+## Ohje
+Aja koko projekti avaamalla Ohjelman käyttöliittymät -> Gui -> Gui.pro QtCreatorilla, ja ajamalla release-modessa.
+
+#### Todo
 * `Dokumentoi bonus-featuret, jos aikaa jää.`
 * `Siisti koodia.`
 

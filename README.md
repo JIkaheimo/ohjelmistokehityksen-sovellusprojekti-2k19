@@ -1,4 +1,4 @@
-# BankSimul
+# BankSimul (r5)
 Tämä repositorio on ohjelmistokehityksen opiskelijoiden (TVT19KMO), ryhmän 5 sovellusprojekti syyslukukauden periodille 2, 2019. Repositorio sisältää projektin aikana tuotetut C++-komponentit ja dokumentit. Projektin tarkoituksena oli tuottaa pankkiautomaattisimulaattori Qt-ohjelmistokomponenttien ja MYSQL-tietokannan avulla.
 
 ![Koontinäkymä](https://github.com/JIkaheimo/ohjelmistokehityksen-sovellusprojekti-2k19/blob/master/Ohjelman%20k%C3%A4ytt%C3%B6liittym%C3%A4t/koonti.png)
@@ -19,10 +19,10 @@ Aja koko projekti avaamalla Ohjelman käyttöliittymät -> Gui -> Gui.pro QtCrea
 * [Käyttöliittymä](https://github.com/JIkaheimo/ohjelmistokehityksen-sovellusprojekti-2k19/tree/master/Ohjelman%20k%C3%A4ytt%C3%B6liittym%C3%A4t/Gui)
 
 ## Työnjako
-* Simo - Laskutus (invoices)
-* Konsta - Rfid ja käyttöliittymä yleisesti
-* Toni - Lahjoitukset ja tilisiirrot
-* Jaakko - Käyttöliittymä, PIN-koodi ja tietokanta + konfigurointi
+* [Simo](https://github.com/t9kasi00) - Laskutus (invoices)
+* [Konsta](https://github.com/KonstaHolm) - Rfid ja käyttöliittymä yleisesti
+* [Toni](https://github.com/tonikem) - Lahjoitukset ja tilisiirrot
+* [Jaakko](https://github.com/JIkaheimo) - Käyttöliittymä, PIN-koodi ja tietokanta + konfigurointi
 
 ## Muuta
 * [Projektin tietokanta](https://github.com/JIkaheimo/ohjelmistokehityksen-sovellusprojekti-2k19/blob/master/Muu/tietokanta.mwb)

@@ -1,5 +1,5 @@
 # BankSimul
-Tämä repositorio on ohjelmistokehityksen opiskelijoiden (TVT19KMO), ryhmän 5 sovellusprojekti syyslukukauden periodille 2, 2019.
+Tämä repositorio on ohjelmistokehityksen opiskelijoiden (TVT19KMO), ryhmän 5 sovellusprojekti syyslukukauden periodille 2, 2019. Repositorio sisältää projektin aikana tuotetut C++-komponentit ja dokumentit. Projektin tarkoituksena oli tuottaa pankkiautomaattisimulaattori Qt-ohjelmistokomponenttien ja MYSQL-tietokannan avulla.
 
 ![Koontinäkymä](https://github.com/JIkaheimo/ohjelmistokehityksen-sovellusprojekti-2k19/blob/master/Ohjelman%20k%C3%A4ytt%C3%B6liittym%C3%A4t/koonti.png)
 
